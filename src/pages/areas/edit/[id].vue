@@ -1,0 +1,98 @@
+<script setup>
+import { show, update } from "@/apis/admin/areas";
+import { requiredValidator } from "@validators";
+import { useRoute } from "vue-router";
+import { useToast } from "vue-toastification";
+import { VForm } from "vuetify/components/VForm";
+
+const toast = useToast();
+const loading = ref(false);
+const areaId = useRoute().params.id;
+const form = ref({ name_en: "", name_ar: "", city_id: 0 });
+const refVForm = ref();
+const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
+
+const _getArea = async () => {
+  await show(areaId).then((res) => {
+    let { name_en, name_ar, city_id } = res.data.data;
+
+    form.value = {
+      name_en,
+      name_ar,
+      city_id,
+    };
+  });
+};
+
+const _updateArea = async () => {
+  refVForm.value?.validate().then(async ({ valid: isValid }) => {
+    if (isValid) {
+      loading.value = true;
+      try {
+        await update(areaId, form.value);
+        loading.value = false;
+        toast.success("Area updated successfully");
+      } catch (err) {
+        toast.error(err.response.data.message);
+        loading.value = false;
+      }
+    }
+  });
+};
+
+onMounted(() => {
+  if (userRole == "admin") {
+    _getArea();
+  }
+});
+</script>
+<template>
+  <VRow class="mt-4 px-4" justify="space-around">
+    <VCol class="pt-0">
+      <VCol
+        class="px-5 rounded"
+        style="background-color: rgb(var(--v-theme-surface))"
+      >
+        <p class="text-h4 pt-3 pb-2">{{ $t('Update Area') }}</p>
+        <VForm ref="refVForm" @submit.prevent="_updateArea">
+          <VCol>
+            <VRow justify="space-between" align="start">
+              <AppTextField
+                :rules="[requiredValidator]"
+                style="width: 100%"
+                class="pe-3 w-50"
+                v-model="form.name_en"
+                label="Name"
+              ></AppTextField>
+              <AppTextField
+                :rules="[requiredValidator]"
+                style="width: 100%"
+                class="ps-3 w-50 text-right"
+                dir="rtl"
+                v-model="form.name_ar"
+                label="الاسم"
+              ></AppTextField>
+            </VRow>
+          </VCol>
+          <VRow class="pb-6 mt-8 px-3" align="center" justify="center">
+            <VBtn
+              :block="$vuetify.display.xs"
+              color="primary"
+              class="px-12"
+              :loading="loading"
+              type="submit"
+            >
+              <VIcon start icon="tabler-check" />{{ $t('Update') }}
+            </VBtn>
+          </VRow>
+        </VForm>
+      </VCol>
+    </VCol>
+  </VRow>
+</template>
+
+<route lang="yaml">
+meta:
+  requiresAuth: true
+  roles: ["admin"]
+</route>

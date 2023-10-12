@@ -1,0 +1,92 @@
+<script setup>
+import { VDataTable } from "vuetify/labs/VDataTable";
+import { useI18n } from "vue-i18n"
+const $useI18n = useI18n()
+const t = $useI18n.t;
+
+const headers = computed(() =>[
+  {
+    title: t("Order ID"),
+    key: "id",
+  },
+  {
+    title: t("Date"),
+    sortable: false,
+    key: "date",
+  },
+  {
+    title: t("Time"),
+    sortable: false,
+    key: "time",
+  },
+  {
+    title: t("Branch"),
+    sortable: false,
+    key: "branch",
+  },
+  {
+    title: t("Product"),
+    sortable: false,
+    key: "first_product",
+  },
+])
+
+const props = defineProps({
+  filters: {
+    type: Object,
+    default: {},
+  },
+  reports: {
+    type: Array,
+    default: [],
+  },
+  meta: {
+    type: Object,
+    default: {},
+  },
+  gettingReports: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+
+const emits = defineEmits();
+const sortedBy = ref();
+const emitSortBy = () => {
+  emits("update-sort-by", sortedBy.value);
+};
+const emitPage = (n) => {
+  emits("update-page-n", n);
+};
+
+onMounted(() => {
+});
+</script>
+
+<template>
+  <VCard elevation="0" class="px-0 mb-0 pb-0 mt-5 pt-3" :loading="gettingReports">
+    <VDataTable
+      v-model:sort-by="sortedBy"
+      @update:sort-by="emitSortBy"
+      :items="reports"
+      :headers="headers"
+      :items-per-page="15"
+    >
+    <template #bottom>
+      <VRow class="mt-3 mb-0 pb-0 mx-0" align="center" justify="end">
+        <VPagination
+          total-visible="5"
+          v-if="props.meta.total"
+          v-model="props.meta.current_page"
+          :length="Math.ceil(props.meta.total / props.meta.per_page)"
+          @update:model-value="emitPage"
+          :disabled="props.gettingReports"
+          :size="35"
+        >
+        </VPagination>
+      </VRow>
+    </template>
+  </VDataTable>
+  </VCard>
+</template>
