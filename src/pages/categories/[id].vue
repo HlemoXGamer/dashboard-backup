@@ -7,7 +7,6 @@
     />
     <VBtn
       v-if="productsIds.length > 0"
-      :loading="loading"
       class="mt-5"
       style="width: 100%"
       @click="UpdateProducts"
@@ -42,14 +41,13 @@
   </div>
 </template>
 <script setup>
-import { updateProducts } from "@/apis/restuarant/products";
 import axios from "@axios";
 import { onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n"
 const $useI18n = useI18n()
 const t = $useI18n.t;
-const loading = ref(false);
+
 const langIdentifier = computed(() => {
     if ($useI18n.locale.value === 'en') {
       return 'name_en';
@@ -100,11 +98,12 @@ const filteredProducts = computed(() => {
   );
 });
 
-const FetchCategory = async () => {
+const FetchCategory = () => {
   // console.log(localStorage.getItem("accessToken"));
-  return axios
+  axios
     .get(`/restaurant-apis/products?category=${route.params.id}`)
     .then((response) => {
+      console.log(response.data.data);
       items.value = response.data.data;
     })
     .catch((error) => {
@@ -112,19 +111,16 @@ const FetchCategory = async () => {
     });
 };
 
-const UpdateProducts = async () => {
-  loading.value = true;
-  try{
-    await updateProducts({ product_ids: productsIds.value })
-    toast.success("Updated Successfully");
-    productsIds.value = [];
-  }catch(err){
-    await FetchCategory();
-    productsIds.value = [];
-    toast.error(err.response.data.message);
-  }finally{
-    loading.value = false;
-  }
+const UpdateProducts = () => {
+  axios
+    .post(`restaurant-apis/update/products`, { product_ids: productsIds.value })
+    .then((response) => {
+      toast.success("Updated Successfully");
+      productsIds.value = [];
+    })
+    .catch((error) => {
+      toast.success(error.message);
+    });
 };
 
 onMounted(() => {

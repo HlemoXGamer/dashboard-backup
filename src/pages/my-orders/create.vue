@@ -304,13 +304,13 @@ const updateStartEndTime = () => {
   const branch = availableBranches.value.find(
     (branch) => branch.id === form.value.branch_id);
 
-  // endTime.value = branch?.end;
-  // startTime.value = new Date().toTimeString().slice(0, 5);
-  // branchStart.value = new Date().toTimeString().slice(0, 5);
+    // endTime.value = branch?.end;
+    // startTime.value = new Date().toTimeString().slice(0, 5);
+    // branchStart.value = new Date().toTimeString().slice(0, 5);
 
-  timeKey.value += 1;
+    timeKey.value += 1;
 
-  _updateTime();
+    _updateTime();
 }
 
 
@@ -326,26 +326,17 @@ const _updateTime = () => {
     const [startHour, startMinute] = branchStart.value.split(':')?.map(Number);
     const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
     if (
-      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
-      // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
-    ) {
-      isClosed.value = true;
-    } else {
-      if (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)) {
-        branchStart.value = branchStartBackup.value;
-      } else {
-        const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
-        const _currentHour = _date.getHours();
-        const _currentMinute = _date.getMinutes();
-        const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
-        const [_endHour, _endMinute] = branchEnd.value.split(':')?.map(Number);
-        if (_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)) {
+        (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
+        // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+        ) {
           isClosed.value = true;
         } else {
-          branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+          if(currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)){
+            branchStart.value = branchStartBackup.value;
+          }else{
+            branchStart.value = new Date().toTimeString().slice(0, 5);
+          }
         }
-      }
-    }
   } else {
     isClosed.value = false;
     branchStart.value = branchStartBackup.value;
@@ -394,11 +385,12 @@ const _createOrder = async () => {
     const [startHour, startMinute] = branchStartBackup.value.split(':')?.map(Number);
     const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
     if (
-      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) || (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
-    ) {
-      return toast.error("The Branch is currently closed.")
-    }
+        (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) || (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+    )
+  {
+    return toast.error("The Branch is currently closed.")
   }
+}
   let formData = new FormData();
   formData.append("branch_id", form.value.branch_id);
   formData.append("is_pickup", form.value.is_pickup);
@@ -560,13 +552,13 @@ onMounted(() => {
 
   let interval = setInterval(() => {
     today.value = new Date().toISOString();
-    if (new Date(currentDay.value).getDate() !== new Date(today.value).getDate()) {
+    if(new Date(currentDay.value).getDate() !== new Date(today.value).getDate()){
       currentDay.value = today.value;
       dateKey.value = dateKey.value * 2;
     }
   }, 1000)
 
-  onBeforeUnmount(() => {
+  onBeforeUnmount(() =>{
     clearInterval(interval);
   })
 });
@@ -591,13 +583,14 @@ onMounted(() => {
       <DialogCloseBtn @click="imageDialog = !imageDialog" />
       <VCard title="Product Images">
         <VCardText class="d-flex flex-row align-center px-0 pb-5 pt-0 flex-wrap px-5">
-          <div :style="form.products.find(
-            (product) => product.product_id == currentProduct,
-          ).images.length == form.products.find(
-            (product) => product.product_id == currentProduct,
-          ).quantity * 10
-            ? 'pointer-events: none;'
-            : ''
+          <div :style="
+              form.products.find(
+                (product) => product.product_id == currentProduct,
+              ).images.length == form.products.find(
+                (product) => product.product_id == currentProduct,
+              ).quantity * 10
+                ? 'pointer-events: none;'
+                : ''
             " style="width: 120px; height: 120px; border: 2px solid lightgrey"
             class="add_image px-0 py-0 rounded mx-1 mt-4 position-relative d-flex align-center justify-center">
             <VIcon class="position-absolute" icon="tabler-plus" />
@@ -722,8 +715,8 @@ onMounted(() => {
               <VRow justify="space-between" align="end">
                 <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
                   v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
-                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
-                  :label="$t('Area')" class="flex-grow-0 my-1 w-50 mx-2" @update:model-value="updateStartEndTime()" />
+                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]" :label="$t('Area')"
+                  class="flex-grow-0 my-1 w-50 mx-2" @update:model-value="updateStartEndTime()" />
                 <AppTextField prepend-inner-icon="tabler-container" :label="$t('Building Number')"
                   :rules="[requiredValidator]" :placeholder="$t('Building Number')" class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_building_no"></AppTextField>
@@ -748,15 +741,17 @@ onMounted(() => {
           <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
             <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
-              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200"
-                prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6"
+                height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
             </VRow>
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
-                    class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
+                    class="flex-grow-1 mx-2 my-1"
+                    :config="{ minDate: today }"
+                    :key="dateKey"
                     @update:model-value="updateStartEndTime" />
                   <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || isClosed"
                     prepend-inner-icon="tabler-clock" v-model="form.delivery_time" :placeholder="$t('Enter your time')"
@@ -771,7 +766,9 @@ onMounted(() => {
                 <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :disabled="!form.is_pickup" prepend-inner-icon="tabler-calendar"
                     v-model="form.delivery_date" :placeholder="$t('Choose Date')" class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: today }" :key="dateKey" @update:model-value="updateStartEndTime" />
+                    :config="{ minDate: today }"
+                    :key="dateKey"
+                    @update:model-value="updateStartEndTime" />
                   <AppDateTimePicker :disabled="!form.is_pickup || isClosed" prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time" :placeholder="$t('Enter your time')" class="flex-grow-1 mx-2 my-1"
                     :key="timeKey" :config="{

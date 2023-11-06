@@ -79,7 +79,6 @@ const branchEnd = ref(null);
 const isClosed = ref(false);
 const branchStartBackup = ref(null);
 const dateKey = ref(1);
-const isBranchSelected = false;
 const form = ref({
   is_pickup: true,
   products: [],
@@ -459,7 +458,7 @@ const _updateTime = () => {
     const [startHour, startMinute] = branchStart.value.split(':')?.map(Number);
     const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
     if (
-      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
+        (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
         // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
         ) {
           isClosed.value = true;
@@ -467,16 +466,7 @@ const _updateTime = () => {
           if(currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)){
             branchStart.value = branchStartBackup.value;
           }else{
-            const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
-            const _currentHour = _date.getHours();
-            const _currentMinute = _date.getMinutes();
-            const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
-            const [_endHour, _endMinute] = branchEnd.value.split(':')?.map(Number);
-            if(_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)){
-              isClosed.value = true;
-            }else{
-              branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
-            }
+            branchStart.value = new Date().toTimeString().slice(0, 5);
           }
         }
   } else {
@@ -1192,7 +1182,7 @@ onMounted(() => {
                   />
                   <AppDateTimePicker
                     :rules="[requiredValidator]"
-                    :disabled="!form.is_pickup || isClosed || isBranchSelected"
+                    :disabled="!form.is_pickup || isClosed"
                     prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time"
                     :placeholder="$t('Enter your time')"

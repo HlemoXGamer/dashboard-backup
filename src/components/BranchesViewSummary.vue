@@ -1,20 +1,9 @@
 <script setup>
-import { get as getCities } from "@/apis/admin/cities";
-const cities = ref([]);
 const props = defineProps({
   data: {
     type: Object,
     default: {},
   },
-});
-const _getCities = () => {
-  getCities().then(({ data, meta }) => {
-    cities.value = data.data;
-    console.log(cities.value);
-  });
-};
-onMounted(() => {
-  _getCities();
 });
 </script>
 <template>
@@ -36,8 +25,7 @@ onMounted(() => {
             :label="$t('Phone Number')"
             class="mx-4 flex-grow-1"
             v-model="data.phone_no"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
         <VCol>
           <AppTextField
@@ -55,8 +43,7 @@ onMounted(() => {
             :label="$t('Working Days')"
             class="mx-4 flex-grow-1"
             v-model="data.working_days"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
         <VCol>
           <AppTextField
@@ -64,8 +51,7 @@ onMounted(() => {
             :label="$t('Start Working Hours')"
             class="mx-4 flex-grow-1"
             v-model="data.start"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
         <VCol>
           <AppTextField
@@ -73,8 +59,7 @@ onMounted(() => {
             :label="$t('End Working Hours')"
             class="mx-4 flex-grow-1"
             v-model="data.end"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
       </VRow>
       <VRow class="px-2 mt-7">
@@ -84,8 +69,7 @@ onMounted(() => {
             :label="$t('Estimate Time')"
             class="mx-4 flex-grow-1"
             v-model="data.est_time"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
         <VCol>
           <AppTextField
@@ -98,13 +82,9 @@ onMounted(() => {
         <VCol>
           <AppTextField
             readonly
-            :label="$t('cities')"
-            :items="cities"
+            :label="$t('Cities')"
             class="mx-4 flex-grow-1"
             v-model="data.city_id"
-            item-value="id"
-            item-title="name"
-            :return-object="false"
           ></AppTextField>
         </VCol>
       </VRow>
@@ -112,18 +92,12 @@ onMounted(() => {
         <VCol>
           <VCombobox
             readonly
+            :label="$t('Areas')"
             class="mx-4 flex-grow-1"
             v-model="data.areas"
-            :label="$t('Areas')"
-            :return-object="false"
-            :items="data.areas"
-            multiple
-            style="width: 100%"
-            variant="outlined"
             item-value="id"
             item-title="name"
-          >
-          </VCombobox>
+          ></VCombobox>
         </VCol>
         <VCol>
           <AppTextField
@@ -131,8 +105,7 @@ onMounted(() => {
             :label="$t('Street Name')"
             class="mx-4 flex-grow-1"
             v-model="data.street_name"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
         <VCol>
           <AppTextField
@@ -140,8 +113,7 @@ onMounted(() => {
             :label="$t('Building Number')"
             class="mx-4 flex-grow-1"
             v-model="data.building_no"
-          >
-          </AppTextField>
+          ></AppTextField>
         </VCol>
       </VRow>
     </VCardText>

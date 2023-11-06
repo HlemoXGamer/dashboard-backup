@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@3ksy/electron-pos-printer": "^1.4.9",
-    "electron-squirrel-startup": "^1.0.0",
+    "@capacitor/core": "^5.5.1",
     "@capacitor/local-notifications": "^5.0.6",
     "@casl/ability": "6.5.0",
     "@casl/vue": "2.2.1",
@@ -28,6 +28,7 @@
     "axios": "1.4.0",
     "axios-mock-adapter": "1.21.4",
     "chart.js": "4.3.0",
+    "electron-squirrel-startup": "^1.0.0",
     "eslint-import-resolver-alias": "^1.1.2",
     "howler": "^2.2.4",
     "html2pdf.js": "^0.10.1",

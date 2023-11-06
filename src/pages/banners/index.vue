@@ -92,22 +92,19 @@ const deleteImage = async (banner) => {
     bannersArray.value.splice(index, 1);
     banners.value.splice(index, 1);
   } else {
-    const fileIndex = bannersArray.value.indexOf(banner);
-    if (fileIndex !== -1) {
-      bannersArray.value.splice(fileIndex, 1);
-      banners.value.splice(fileIndex, 1);
-    } else {
-      bannersArray.value.forEach(async (file, index) => {
-        if (file instanceof File) {
-          await toBase64(file).then((base64) => {
-            if (base64 === banner) {
-              bannersArray.value.splice(index, 1);
-              banners.value.splice(index, 1);
-            }
-          });
-        }
-      });
+    const index = bannersArray.value.indexOf(banner);
+    if (index !== -1) {
+      bannersArray.value.splice(index, 1);
     }
+    banners.value.forEach(async (file) => {
+      if (file instanceof File) {
+        await toBase64(file).then((base64) => {
+          if (base64 == banner) {
+            banners.value.splice(file, 1);
+          }
+        });
+      }
+    });
   }
 };
 

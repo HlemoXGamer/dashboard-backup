@@ -355,7 +355,7 @@ const exportExcel = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "custom-report.xlsx");
+      link.setAttribute("download", "reports-report.xlsx");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -366,9 +366,6 @@ const exportExcel = () => {
 const filters = computed(() => {
   return Object.keys(getFilters().filters);
 });
-const hasProducts = computed(() => {
-  return (Object.keys(getFilters().filters).includes("product") || Object.keys(getFilters().filters).includes("category")) && isFiltered.value === true && gettingReports.value === false;
-})
 
 onMounted(() => {
   if(userRole == "admin"){
@@ -503,7 +500,7 @@ onMounted(() => {
             </VCol>
           </VRow>
 
-          <CustomizedReportsTable :hasProducts="hasProducts" :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
+          <CustomizedReportsTable :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
             @update-sort-by="handleUpdateSortBy" @update-page-n="handlePageUpdate" />
         </VCol>
       </VWindowItem>
@@ -511,7 +508,7 @@ onMounted(() => {
       <VWindowItem value="layouts" class="py-7">
         <VCol style="background-color: rgb(var(--v-theme-surface));" class="rounded pb-5">
           <p class="text-h4 pt-3 pb-0 mb-3 px-3">{{ $t('layouts_reports') }}</p>
-          <LayoutsReportsTable :hasProducts="hasProducts" :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
+          <LayoutsReportsTable :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
             @update-sort-by="handleUpdateSortBy" @update-page-n="handlePageUpdate" />
         </VCol>
       </VWindowItem>

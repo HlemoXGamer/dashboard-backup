@@ -60,6 +60,7 @@ export default [
     ],
     roles: ["admin", "markter"],
   },
+
   {
     title: "Categories",
     to: { name: "categories" },

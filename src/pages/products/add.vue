@@ -37,9 +37,9 @@ const form = ref({
   prep_time: "",
   price: "",
   status: 0,
-  // extra: [],
-  // flavor: [],
-  // is_pre: 0,
+  extra: [],
+  flavor: [],
+  is_pre: 0,
 });
 const refVForm = ref();
 const binaryImages = ref([]);
@@ -74,8 +74,8 @@ const _addProduct = async () => {
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
       formData.append("status", form.value.status);
-      // formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
-      // formData.append("is_pre", form.value.is_pre);
+      formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
+      formData.append("is_pre", form.value.is_pre);
 
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
@@ -235,7 +235,7 @@ onMounted(() => {
                   :label="$t('Preparation Time')"
                 ></AppTextField>
               </VRow>
-              <!-- <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
+              <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   multiple
@@ -257,7 +257,7 @@ onMounted(() => {
                   class="flex-grow-1 ml-1 mt-6"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
-              </VRow> -->
+              </VRow>
           </VCol>
         </VCol>
       </VCol>
@@ -334,13 +334,13 @@ onMounted(() => {
             :true-value="1"
             :label="$t('Need Note')"
           />
-          <!-- <VSwitch
+          <VSwitch
             v-model="form.is_pre"
             :inset="false"
             :false-value="0"
             :true-value="1"
             :label="$t('Is Pre')"
-          /> -->
+          />
         </VCol>
         <VRow class="px-5 mt-2">
           <VBtn color="primary" :loading="loading" type="submit" block

@@ -11,12 +11,7 @@ const refVForm = ref();
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 import router from "@/router";
 
-const isFlavor = computed(() => { 
-  if(form.value.type === "flavor"){
-    form.value.price = 0;
-  }
-  return form.value.type === "flavor" 
-});
+const isFlavor = computed(() => form.value.type === "flavor");
 
 const _addExtraFlavor = async () => {
   refVForm.value?.validate().then(async ({ valid: isValid }) => {

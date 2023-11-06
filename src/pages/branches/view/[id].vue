@@ -1,13 +1,11 @@
 <script setup>
 import { show as showBranch } from "@/apis/admin/branches";
 import { getUnique as getAreas } from "@/apis/admin/areas";
-import { getBranchesLog } from '@/apis/admin/branches'
 
 import { useRoute } from "vue-router";
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const voucherId = useRoute().params.id;
 const areasData = ref([]);
-const branchesLog = ref([]);
 
 const form = ref({
   start: "",
@@ -79,27 +77,24 @@ const _showBranch = async () => {
     getAreas()
       .then(({ data, meta }) => {
         areasData.value = data.data;
+        form.value.areas.forEach((area) => {
+          areasData.value.push(area);
+        });
       })
+      .finally(() => {
+        form.value.areas = form.value.areas.map((area) => area.id);
+      });
   });
 };
 
-const _getBranchesLog = () => {
-  getBranchesLog().then(({data, meta}) => {
-    branchesLog.value = data.data
-  })
-}
-
 onMounted(() => {
-  if (userRole === 'admin') {
-    _showBranch();
-    _getBranchesLog()
-  }
+  _showBranch();
 });
 </script>
 <template>
   <VRow class="mt-4 px-4" justify="space-around">
     <VCol class="pt-0">
-      <BranchesViewSummary :data="form" :cities="cities" />
+      <BranchesViewSummary :data="form" />
       <VRow class="gap-5 pt-16 pl-3 pb-0">
         <VBtn
           :variant="getButtonVariant('today')"
@@ -122,7 +117,7 @@ onMounted(() => {
         style="background-color: rgb(var(--v-theme-surface))"
       >
         <p class="text-h4 pt-3 pb-2">{{ $t("Branches Log") }}</p>
-        <BranchesViewTable :items="branchesLog" />
+        <BranchesViewTable :items="form.v_orders" />
       </VCol>
     </VCol>
   </VRow>

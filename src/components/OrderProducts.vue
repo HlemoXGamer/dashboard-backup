@@ -50,7 +50,7 @@ const props = defineProps({
           class="badge position-absolute bg-error"
           >1</span
         >
-      </IconBtn> -->
+      </IconBtn>
       <IconBtn v-if="item.raw.has_image == 1" class="position-relative">
         <VIcon icon="tabler-photo-plus" @click="$emit('add-image', item.raw)" />
         <span

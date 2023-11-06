@@ -6,6 +6,9 @@ import {
   update as updateAdminProduct,
 } from "@/apis/admin/products";
 
+import { getFlavor } from "@/apis/admin/extra-flavors";
+import { getExtra } from "@/apis/admin/extra-flavors";
+
 import { get as getMarkterCategories } from "@/apis/markter/categories";
 import {
   removeImage as removeMarkterImage,
@@ -25,6 +28,8 @@ const productId = useRoute().params.id;
 const images = ref([]);
 const imagesArray = ref([]);
 const categories = ref([]);
+const extras = ref([]);
+const flavors = ref([]);
 const toast = useToast();
 const refVForm = ref();
 const form = ref({
@@ -43,10 +48,24 @@ const form = ref({
   name_en: "",
   prep_time: "",
   price: "",
-  // extra: '',
-  // flavor: '',
-  // is_pre: 0,
+  extras: [],
+  flavors: [],
+  is_pre: 0,
 });
+
+
+// Initialize form.extras and form.flavors with quantity property
+form.extras = form.value.extras.map((extra) => ({
+  id: extra.id,
+  name: extra.name,
+  quantity: 0, // You can set the initial quantity to 0
+}));
+
+form.flavors = form.value.flavors.map((flavor) => ({
+  id: flavor.id,
+  name: flavor.name,
+  quantity: 1, // You can set the initial quantity to 0
+}));
 
 const binaryImages = ref([]);
 
@@ -81,9 +100,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
-          // extra,
-          // flavor,
-          // is_pre
+          extras,
+          flavors,
+          is_pre
         } = res.data.data;
 
         form.value = {
@@ -101,9 +120,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
-          // extra,
-          // flavor,
-          // is_pre
+          extras,
+          flavors,
+          is_pre
         };
         form.value.categories = res.data.data.categories.map(
           (category) => category.id,
@@ -127,9 +146,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
-          // extra,
-          // flavor,
-          // is_pre
+          extras,
+          flavors,
+          is_pre
         } = res.data.data;
 
         form.value = {
@@ -148,9 +167,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
-          // extra,
-          // flavor,
-          // is_pre
+          extras,
+          flavors,
+          is_pre
         };
 
         imagesArray.value = form.value.images;
@@ -190,6 +209,13 @@ const _updateProduct = async () => {
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
     if (isValid) {
       loading.value = true;
+
+      // Prepare the extra_flavors data structure
+      const extraFlavors = form.value.extras.map((extra) => ({
+        id: extra.id,
+        quantity: extra.quantity || 1, // Set a default quantity of 1
+      }));
+
       let formData = new FormData();
       formData.append("code", form.value.code);
       formData.append("created_at", form.value.created_at);
@@ -205,9 +231,18 @@ const _updateProduct = async () => {
       formData.append("name_en", form.value.name_en);
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
-      // formData.append("extra", form.value.extra);
-      // formData.append("flavor", form.value.flavor);
-      // formData.append("is_pre", form.value.is_pre);
+
+      // form.value.extras.concat(form.value.flavors).forEach((extra_flavor, index) => {
+      //     formData.append(`extra_flavors[${index}]`, extra_flavor)
+      // })
+
+      // Append extra_flavors to the formData
+      extraFlavors.forEach((extraFlavor, index) => {
+        formData.append(`extra_flavors[${index}][id]`, extraFlavor.id);
+        formData.append(`extra_flavors[${index}][quantity]`, extraFlavor.quantity);
+      });
+
+      formData.append("is_pre", form.value.is_pre);
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
       });
@@ -237,6 +272,25 @@ const _getCategories = () => {
   }
 };
 
+const _getFlavors = () => {
+  if (userRole == 'admin')
+  {
+    getFlavor().then(({ data, meta }) => {
+    flavors.value = data.data;
+  });
+  }
+};
+
+
+const _getExtras = () => {
+  if (userRole == 'admin')
+  {
+    getExtra().then(({ data, meta }) => {
+    extras.value = data.data;
+  });
+  }
+};
+
 function isURL(data) {
   const urlPattern = /^(ftp|http|https):\/\/[^ "]+$/;
   return urlPattern.test(data);
@@ -244,6 +298,8 @@ function isURL(data) {
 
 onMounted(() => {
   _getCategories();
+  _getFlavors();
+  _getExtras();
   _showProduct();
 });
 </script>
@@ -340,40 +396,48 @@ onMounted(() => {
               :label="$t('Preparation Time')"
             ></AppTextField>
           </VRow>
-          <!-- <VRow v-if="userRole == 'admin'" class="mt-2" justify="space-between" align="center" style="gap: 5px">
+          <VRow v-if="userRole == 'admin'" class="mt-2" justify="space-between" align="center" style="gap: 5px">
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   multiple
                   :return-object="false"
-                  :items="[
-                    {
-                      id: 0,
-                      name:'test',
-                    }
-                  ]"
+                  :items="extras"
                   item-value="id"
                   item-title="name"
-                  v-model="form.extra"
+                  v-model="form.extras"
                   class="flex-grow-1 ml-1 mt-6"
                   :label="$t('Select Extra')"
                 ></VCombobox>
+               
+  <!-- Display selected extras in a single row with name and quantity -->
+ 
+  <!-- Display selected extras in a single row with name and quantity -->
+  <VRow v-for="(extra, index) in form.extras" :key="index">
+    <VTextField
+      :value="extra.name"
+      disabled
+      class="flex-grow-1 ml-1"
+      :label="$t('Extra Name')"
+    ></VTextField>
+    <AppTextField
+      v-model="extra.quantity"
+      :rules="[requiredValidator, numericValidator]"
+      class="flex-grow-1 ml-1"
+      :label="$t('Quantity')"
+    ></AppTextField>
+  </VRow>
+
                 <VCombobox
                   prepend-inner-icon="tabler-package"
-                  multiple
                   :return-object="false"
-                  :items="[
-                    {
-                      id: 0,
-                      name:'test',
-                    }
-                  ]"
+                  :items="flavors"
                   item-value="id"
                   item-title="name"
-                  v-model="form.flavor"
+                  v-model="form.flavors"
                   class="flex-grow-1 ml-1 mt-6"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
-              </VRow> -->
+              </VRow>
         </VCol>
       </VCol>
       <VCol
@@ -449,13 +513,13 @@ onMounted(() => {
             :true-value="1"
             :label="$t('Need Note')"
           />
-          <!-- <VSwitch
+          <VSwitch
             v-model="form.is_pre"
             :inset="false"
             :false-value="0"
             :true-value="1"
             :label="$t('Is Pre')"
-          /> -->
+          />
         </VCol>
         <VRow class="px-5 mt-2">
           <VBtn color="primary" :loading="loading" type="submit" block
