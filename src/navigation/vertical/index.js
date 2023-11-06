@@ -44,6 +44,20 @@ export default [
     title: "Products",
     to: { name: "products" },
     icon: { icon: "tabler-baguette" },
+    children: [
+      {
+        title: "Products",
+        to: { name: "products" },
+        icon: { icon: "tabler-baguette" },
+        roles: ["admin", "markter"],
+      },
+      {
+        title: 'Extra And Flavors',
+        to: { name: "extra-flavors" },
+        icon: { icon: "tabler-baguette" },
+        roles: ["admin"],
+      },
+    ],
     roles: ["admin", "markter"],
   },
   {
@@ -56,7 +70,7 @@ export default [
     title: "Deliveries",
     to: { name: "deliveries" },
     icon: { icon: "tabler-truck-delivery" },
-    roles: ["admin", "restaurant"],
+    roles: ["admin", "restaurant", "logistic"],
   },
   {
     title: "Employees",
@@ -115,27 +129,27 @@ export default [
   {
     title: 'Reporting',
     icon: { icon: 'tabler-chart-histogram' },
-    roles:  ["admin", "restaurant", "operation", "finance", "logistic", "agent"],
+    roles: ["admin", "restaurant", "operation", "finance", "logistic", "agent"],
     children: [
       {
         title: "Customize Reports",
-        to: { name: "customize-report"},
-        roles:  ["admin", "operation", "finance","logistic", "agent"],
+        to: { name: "customize-report" },
+        roles: ["admin", "operation", "finance", "logistic", "agent"],
       },
       {
         title: "Branches & Areas",
-        to: { name: "branches-areas-report"},
-        roles:  ["admin", "restaurant", "operation", "finance","logistic", "agent"],
+        to: { name: "branches-areas-report" },
+        roles: ["admin", "restaurant", "operation", "finance", "logistic", "agent"],
       },
       {
         title: "Sales Rate",
-        to: { name: "sales-rate-report"},
-        roles:  ["admin", "restaurant", "agent"],
+        to: { name: "sales-rate-report" },
+        roles: ["admin", "restaurant", "agent"],
       },
       {
         title: "Statistics Analysis",
-        to: { name: "statistics-analysis-report"},
-        roles:  ["admin"],
+        to: { name: "statistics-analysis-report" },
+        roles: ["admin"],
       }
     ]
   },

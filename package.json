@@ -8,9 +8,15 @@
     "preview": "vite preview --port 5050",
     "lint": "eslint . -c .eslintrc.js --fix --ext .ts,.js,.vue,.tsx,.jsx",
     "build:icons": "node src/@iconify/build-icons.js",
-    "postinstall": "npm run build:icons"
+    "postinstall": "npm run build:icons",
+    "electron:start": "electron .",
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "dependencies": {
+    "@3ksy/electron-pos-printer": "^1.4.9",
+    "electron-squirrel-startup": "^1.0.0",
     "@capacitor/local-notifications": "^5.0.6",
     "@casl/ability": "6.5.0",
     "@casl/vue": "2.2.1",
@@ -50,6 +56,12 @@
     "webfontloader": "1.6.28"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-deb": "^6.4.2",
+    "@electron-forge/maker-rpm": "^6.4.2",
+    "@electron-forge/maker-squirrel": "^6.4.2",
+    "@electron-forge/maker-zip": "^6.4.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
     "@antfu/eslint-config-vue": "0.38.5",
     "@fullcalendar/core": "6.1.6",
     "@fullcalendar/daygrid": "6.1.6",

@@ -2,6 +2,7 @@
 import { get as getBranches } from "@/apis/admin/branches";
 import { get as getAdminDeliveries } from "@/apis/admin/deliveries";
 import { get as getRestaurantDeliveries } from "@/apis/restuarant/deliveries";
+import { get as getLogisticDeliveries } from '@/apis/logistics/deliveries'
 
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const loading = ref(false);
@@ -27,6 +28,10 @@ const _getDeliveries = async () => {
     await getRestaurantDeliveries().then(({ data, meta }) => {
       deliveries.value = data.data;
     });
+  } else if (userRole == 'logistic') {
+    await getLogisticDeliveries().then(({ data, meta }) => {
+      deliveries.value = data.data
+    })
   }
   loading.value = false;
 };
@@ -46,7 +51,7 @@ onMounted(() => {
         <p class="text-h4">{{ $t('Deliveries') }}</p>
         <!-- Appears Only In Admin -->
         <VBtn
-          v-if="userRole == 'admin'"
+          v-if="userRole == 'admin' || userRole == 'logistic'"
           @click="$router.push('deliveries/add/')"
         >
           <VIcon start icon="tabler-plus" />{{ $t('Add Delivery') }}

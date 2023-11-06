@@ -1,27 +1,40 @@
 <script setup>
-import { remove as removeArea } from "@/apis/admin/areas";
+import { remove as removeExtraFlavor } from "@/apis/admin/extra-flavors";
 import { useToast } from "vue-toastification";
 import { VDataTable } from "vuetify/labs/VDataTable";
 import { useI18n } from "vue-i18n"
 import { computed } from "vue";
+
 const $useI18n = useI18n();
 const t = $useI18n.t
 const langIdentifier = computed(() => {
     if ($useI18n.locale.value === 'en') {
-      return 'name_en';
+      return 'name';
     } else if ($useI18n.locale.value === 'ar') {
-      return 'name_ar';
+      return 'name';
     }
   });
   
-const areaData = ref([]);
+const extraFlavorData = ref([]);
 const loadingDialog = ref(false);
 const toast = useToast();
 const deleteDialog = ref(false);
 const headers = computed(() => [
   {
+    title: t("Code"),
+    key: 'code',
+  },
+  {
     title: t("Name"),
     key: langIdentifier,
+  },
+  {
+    title: t("Type"),
+    key: 'type',
+  },
+  {
+    title: t("Price"),
+    key: 'price',
   },
   {
     title: t("Actions"),
@@ -38,31 +51,31 @@ const customFilter = (value, search, item, key) => {
   return false;
 };
 
-let currentAreaData = {};
-const _deleteDialog = (product) => {
-  currentAreaData = product;
-  areaData.value = JSON.stringify(product);
-  areaData.value = JSON.parse(areaData.value);
+let currentExtraFlavorData = {};
+
+const _deleteDialog = (extraFlavor) => {
+  currentExtraFlavorData = extraFlavor;
+  extraFlavorData.value = JSON.stringify(extraFlavor);
+  extraFlavorData.value = JSON.parse(extraFlavorData.value);
   deleteDialog.value = true;
 };
 
-const deleteArea = async () => {
+const deleteExtraFlavor = async () => {
   loadingDialog.value = true;
   try {
-    await removeArea(areaData.value);
-    console.log(currentAreaData);
-    props.areas.splice(props.areas.indexOf(currentAreaData), 1);
-    toast.success("Area deleted successfully");
+    await removeExtraFlavor(extraFlavorData.value);
+    props.extra_flavors.splice(props.extra_flavors.indexOf(currentExtraFlavorData), 1);
+    toast.success("Extra/Flavor deleted successfully");
     loadingDialog.value = false;
     deleteDialog.value = false;
   } catch (err) {
-    console.log('Something Went Wrong');
+    toast.error("Something Went Wrong");
     deleteDialog.value = false;
   }
 };
 
 const props = defineProps({
-  areas: {
+  extra_flavors: {
     type: Array,
     default: [],
   },
@@ -83,8 +96,8 @@ const props = defineProps({
   <VDialog v-model="deleteDialog" persistent class="v-dialog-sm">
     <DialogCloseBtn @click="deleteDialog = !deleteDialog" />
 
-    <VCard title="Delete Area">
-      <VCardText> {{ $t("Are you sure that you want to delete this Area?") }} </VCardText>
+    <VCard title="Delete Extra/Flavor">
+      <VCardText> {{ $t("Are you sure that you want to delete this Extra Or Flavor?") }} </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
         <VBtn
@@ -95,13 +108,13 @@ const props = defineProps({
         >
           {{ $t("Cancel") }}
         </VBtn>
-        <VBtn @click="deleteArea" :loading="loadingDialog"> {{ $t("Delete") }} </VBtn>
+        <VBtn @click="deleteExtraFlavor" :loading="loadingDialog"> {{ $t("Delete") }} </VBtn>
       </VCardText>
     </VCard>
   </VDialog>
   <VCard elevation="0" rounded="0" class="px-0 mb-0 pb-5 mt-10 pt-2" :loading="loading">
   <VDataTable
-    :items="props.areas"
+    :items="props.extra_flavors"
     :headers="headers"
     :search="props.search"
     :custom-filter="customFilter"
@@ -109,7 +122,7 @@ const props = defineProps({
   >
     <template #item.actions="{ item }">
       <div class="d-flex gap-1">
-        <IconBtn @click="$router.push(`areas/edit/${item.raw.id}`)">
+        <IconBtn @click="$router.push(`extra-flavors/edit/${item.raw.id}`)">
           <VIcon icon="mdi-pencil-outline" />
         </IconBtn>
         <IconBtn>

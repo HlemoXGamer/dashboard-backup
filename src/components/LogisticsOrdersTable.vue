@@ -25,7 +25,7 @@ const headers = computed(() =>[
   },
   {
     title: t('Paid Date'),
-    sortable: false,
+    sortable: true,
     key: 'paid_at',
     align: "center"
   },

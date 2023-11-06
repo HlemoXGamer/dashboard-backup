@@ -1,5 +1,6 @@
 <script setup>
-import { remove as removeDelivery } from "@/apis/admin/deliveries";
+import { remove as removeAdminDelivery } from "@/apis/admin/deliveries";
+import { remove as removeLogisticDelivery } from "@/apis/logistics/deliveries";
 import { useToast } from "vue-toastification";
 import { VDataTable } from "vuetify/labs/VDataTable";
 
@@ -84,7 +85,14 @@ const _deleteDialog = (product) => {
 const deleteDeliveryMan = async () => {
   loadingDialog.value = true;
   try {
-    await removeDelivery(deliveryData.value);
+    if (userRole == 'admin')
+    {
+      await removeAdminDelivery(deliveryData.value);
+    }
+    else if (userRole == 'logistic')
+    {
+      await removeLogisticDelivery(deliveryData.value);
+    }
     props.deliveries.splice(props.deliveries.indexOf(currentDeliveryData), 1);
     toast.success("Delivery man deleted successfully");
     loadingDialog.value = false;
@@ -178,7 +186,7 @@ const props = defineProps({
         {{ resolveStatusVariant(item.raw.is_active).text }}
       </VChip>
     </template>
-    <template v-if="userRole == 'admin'" #item.actions="{ item }">
+    <template v-if="userRole == 'admin' || userRole == 'logistic'" #item.actions="{ item }">
       <div class="d-flex gap-1">
         <IconBtn @click="$router.push(`deliveries/edit/${item.raw.id}`)">
           <VIcon icon="mdi-pencil-outline" />

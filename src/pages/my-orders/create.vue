@@ -39,8 +39,7 @@ const productCount = ref(1);
 const selectedProduct = ref();
 const orderProducts = ref([]);
 const total = ref(0);
-const startTime = ref();
-const endTime = ref();
+const today = ref(new Date().toISOString());
 const voucherLoading = ref(false);
 const timeKey = ref(0);
 const addressDialog = ref(false);
@@ -55,6 +54,11 @@ const noteDialog = ref(false);
 const imageErrors = ref([]);
 const employeeCode = ref("");
 const isAnEmployee = ref(false);
+const branchStart = ref(null);
+const branchEnd = ref(null);
+const isClosed = ref(false);
+const branchStartBackup = ref(null);
+const dateKey = ref(1);
 const form = ref({
   is_pickup: true,
   products: [],
@@ -122,20 +126,15 @@ const _getCustomer = () => {
     }
   });
 };
-
 const _getBranches = () => {
   branchesLoading.value = true;
-  getBranches().then(({ data, meta }) => {
-    branches.value = data.data.filter(branch => branch.is_active === 1);
-    let headBranch = data.data.find(
-      (branch) => branch.name_en === "Head Branch",
-    );
-    availableBranches.value = data.data.filter(
-      (branch) => branch.id === headBranch.id,
-    );
-    endTime.value = availableBranches.value[0]?.["end"];
-    startTime.value = availableBranches.value[0]?.["start"];
-    console.log(startTime);
+  getBranches().then(({ data }) => {
+    branches.value = data.data.filter((branch) => branch.is_active === 1);
+    availableBranches.value = data.data.filter((branch) => branch.id === 2);
+    // startTime.value = availableBranches.value[0].start;
+    branchStart.value = availableBranches.value[0].start;
+    branchStartBackup.value = branchStart.value;
+    branchEnd.value = availableBranches.value[0].end;
     timeKey.value += 1;
     branchesLoading.value = false;
   });
@@ -197,7 +196,6 @@ const addProduct = () => {
         product_id: product.id,
         quantity: parseInt(productCount.value),
         images: [],
-        binary: [],
         notes: [],
       });
       for (let i = 0; i < productCount.value; i++) {
@@ -211,7 +209,6 @@ const addProduct = () => {
         product_id: product.id,
         quantity: parseInt(productCount.value),
         images: [],
-        binary: [],
       });
       product.images = 0;
       imageErrors.value.push({ product_id: product.id });
@@ -307,8 +304,9 @@ const updateStartEndTime = () => {
   const branch = availableBranches.value.find(
     (branch) => branch.id === form.value.branch_id);
 
-  endTime.value = branch?.end;
-  startTime.value = new Date().toTimeString().slice(0, 5);
+  // endTime.value = branch?.end;
+  // startTime.value = new Date().toTimeString().slice(0, 5);
+  // branchStart.value = new Date().toTimeString().slice(0, 5);
 
   timeKey.value += 1;
 
@@ -316,29 +314,41 @@ const updateStartEndTime = () => {
 }
 
 
-const _updateTime = async () => {
-  let { data } = await useTime();
-  let date = new Date(data.utc_datetime);
-  _updateBranches();
+const _updateTime = () => {
+  const date = new Date();
+  const today = date.toISOString();
+  _updateBranches()
+
   const branch = availableBranches.value.find(branch => branch.id == form.value.branch_id);
   if (form.value.delivery_date == formatDate(date)) {
-    startTime.value = branch.start ?? null;
-    endTime.value = branch.end ?? null;
     const currentHour = date.getHours();
     const currentMinute = date.getMinutes();
-    const [startHour, startMinute] = startTime.value.split(':')?.map(Number);
-    const [endHour, endMinute] = endTime.value.split(':')?.map(Number);
+    const [startHour, startMinute] = branchStart.value.split(':')?.map(Number);
+    const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
     if (
-      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) ||
-      (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
+      // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
     ) {
-      startTime.value = null;
+      isClosed.value = true;
     } else {
-      startTime.value = new Date().toTimeString().slice(0, 5);
+      if (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)) {
+        branchStart.value = branchStartBackup.value;
+      } else {
+        const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
+        const _currentHour = _date.getHours();
+        const _currentMinute = _date.getMinutes();
+        const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
+        const [_endHour, _endMinute] = branchEnd.value.split(':')?.map(Number);
+        if (_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)) {
+          isClosed.value = true;
+        } else {
+          branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+        }
+      }
     }
   } else {
-    startTime.value = branch?.start;
-    endTime.value = branch?.end;
+    isClosed.value = false;
+    branchStart.value = branchStartBackup.value;
   }
 
   timeKey.value += 1;
@@ -378,18 +388,17 @@ const deleteProduct = (product) => {
 };
 
 const _createOrder = async () => {
-  if(form.value.branch_id !== null){
-      let { data } = await useTime();
-      const end = branches.value.find(branch => branch.id === form.value.branch_id).end;
-      const [targetHour, targetMinute] = end.split(":").map(Number);
-      const currentDate = new Date(data.utc_datetime);
-      const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), targetHour, targetMinute);
-
-      if (currentDate > targetDate) {
-        toast.error("The Branch is either Closed or not Selected");
-      }
-      return;
-    };
+  if (form.value.is_pickup === false) {
+    const currentHour = new Date().getHours();
+    const currentMinute = new Date().getMinutes();
+    const [startHour, startMinute] = branchStartBackup.value.split(':')?.map(Number);
+    const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
+    if (
+      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) || (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+    ) {
+      return toast.error("The Branch is currently closed.")
+    }
+  }
   let formData = new FormData();
   formData.append("branch_id", form.value.branch_id);
   formData.append("is_pickup", form.value.is_pickup);
@@ -420,7 +429,7 @@ const _createOrder = async () => {
     formData.append(`products[${index}][product_id]`, product.product_id);
     formData.append(`products[${index}][quantity]`, product.quantity);
     product.images?.forEach((image, img_index) => {
-      formData.append(`products[${index}][images][${img_index}]`, image);
+      formData.append(`products[${index}][images][${img_index}]`, image.file);
     });
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
@@ -494,16 +503,13 @@ const addFile = async (file) => {
   let orderProduct = orderProducts.value.find(
     (product) => product.id == currentProduct.value,
   );
-  const img = file.target.files[0];
-  form.value.products
-    .find((product) => product.product_id == currentProduct.value)
-    .images.push(img);
-  await toBase64(img).then((base64) => {
-    form.value.products
-      .find((product) => product.product_id == currentProduct.value)
-      .binary.push(base64);
+  let productImages = form.value.products
+    .find((product) => product.product_id == currentProduct.value);
+  const img = { file: file.target.files[0], id: productImages.images.length, binary: "" };
+  await toBase64(img.file).then((base64) => {
+    img.binary = base64;
   });
-
+  productImages.images.push(img);
   orderProduct.images += 1;
 
   if (orderProduct.images == orderProduct.quantity) {
@@ -515,6 +521,8 @@ const addFile = async (file) => {
       ),
     );
   }
+
+  file.target.value = "";
 };
 
 const deleteImage = (image) => {
@@ -539,15 +547,9 @@ const deleteImage = (image) => {
       imageErrors.value.push({ product_id: orderProduct.id });
     }
   }
-  product.binary.splice(product.binary.indexOf(image), 1);
-  product.images.forEach(async (img) => {
-    await toBase64(img).then((base64) => {
-      if (base64 == image) {
-        product.images.splice(product.images.indexOf(img), 1);
-      }
-    });
-  });
+  product.images.splice(product.images.indexOf(image), 1);
 };
+const currentDay = ref(new Date().toISOString());
 onMounted(() => {
   if (userRole == "agent") {
     _getBranches();
@@ -555,6 +557,18 @@ onMounted(() => {
     _getAreas();
     _getServiceCost();
   }
+
+  let interval = setInterval(() => {
+    today.value = new Date().toISOString();
+    if (new Date(currentDay.value).getDate() !== new Date(today.value).getDate()) {
+      currentDay.value = today.value;
+      dateKey.value = dateKey.value * 2;
+    }
+  }, 1000)
+
+  onBeforeUnmount(() => {
+    clearInterval(interval);
+  })
 });
 </script>
 <template>
@@ -579,9 +593,11 @@ onMounted(() => {
         <VCardText class="d-flex flex-row align-center px-0 pb-5 pt-0 flex-wrap px-5">
           <div :style="form.products.find(
             (product) => product.product_id == currentProduct,
-          ).images.length == 1
-              ? 'pointer-events: none;'
-              : ''
+          ).images.length == form.products.find(
+            (product) => product.product_id == currentProduct,
+          ).quantity * 10
+            ? 'pointer-events: none;'
+            : ''
             " style="width: 120px; height: 120px; border: 2px solid lightgrey"
             class="add_image px-0 py-0 rounded mx-1 mt-4 position-relative d-flex align-center justify-center">
             <VIcon class="position-absolute" icon="tabler-plus" />
@@ -596,14 +612,14 @@ onMounted(() => {
                 " />
           </div>
           <div v-for="image in form.products.find(
-            (product) => product.product_id == currentProduct,
-          ).binary" style="width: 120px; height: 120px; border: 2px solid lightgrey"
+            (product) => product.product_id == currentProduct
+          ).images" style="width: 120px; height: 120px; border: 2px solid lightgrey"
             class="product_image px-0 py-0 rounded mx-1 mt-4 position-relative d-flex align-center justify-center">
             <VBtn size="33" color="error" class="delete_btn position-absolute px-1 py-1">
               <VIcon icon="tabler-trash" size="22" @click="deleteImage(image)" />
             </VBtn>
             <div class="w-100 h-100" style="overflow: hidden">
-              <img :src="image" style="object-fit: cover" class="w-100 h-100" alt="product_image" />
+              <img :src="image.binary" style="object-fit: cover" class="w-100 h-100" alt="product_image" />
             </div>
           </div>
         </VCardText>
@@ -704,10 +720,10 @@ onMounted(() => {
             <p class="text-h4 pt-3 mb-1">{{ $t('User Address') }}</p>
             <VCol>
               <VRow justify="space-between" align="end">
-                <VSelect clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
+                <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
                   v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
-                  style="width: 100%" variant="outlined" :rules="[requiredValidator]" :label="$t('Area')"
-                  class="flex-grow-0 my-1 w-50 mx-2" @update:model-value="updateStartEndTime()" />
+                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
+                  :label="$t('Area')" class="flex-grow-0 my-1 w-50 mx-2" @update:model-value="updateStartEndTime()" />
                 <AppTextField prepend-inner-icon="tabler-container" :label="$t('Building Number')"
                   :rules="[requiredValidator]" :placeholder="$t('Building Number')" class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_building_no"></AppTextField>
@@ -732,38 +748,38 @@ onMounted(() => {
           <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
             <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
-              <VChip v-if="startTime == null && form.is_pickup" size="large" label color="error" class="text-h6"
-                height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200"
+                prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
             </VRow>
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
-                    class="flex-grow-1 mx-2 my-1" :config="{ minDate: new Date().toISOString() }"
+                    class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
                     @update:model-value="updateStartEndTime" />
-                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || startTime == null"
+                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || isClosed"
                     prepend-inner-icon="tabler-clock" v-model="form.delivery_time" :placeholder="$t('Enter your time')"
                     class="flex-grow-1 mx-2 my-1" :key="timeKey" :config="{
                       enableTime: true,
                       noCalendar: true,
                       dateFormat: 'H:i',
-                      minTime: startTime,
-                      maxTime: endTime,
+                      minTime: branchStart,
+                      maxTime: branchEnd,
                     }" />
                 </div>
                 <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :disabled="!form.is_pickup" prepend-inner-icon="tabler-calendar"
                     v-model="form.delivery_date" :placeholder="$t('Choose Date')" class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: new Date().toISOString() }" @update:model-value="updateStartEndTime" />
-                  <AppDateTimePicker :disabled="!form.is_pickup || startTime == null" prepend-inner-icon="tabler-clock"
+                    :config="{ minDate: today }" :key="dateKey" @update:model-value="updateStartEndTime" />
+                  <AppDateTimePicker :disabled="!form.is_pickup || isClosed" prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time" :placeholder="$t('Enter your time')" class="flex-grow-1 mx-2 my-1"
                     :key="timeKey" :config="{
                       enableTime: true,
                       noCalendar: true,
                       dateFormat: 'H:i',
-                      minTime: startTime,
-                      maxTime: endTime,
+                      minTime: branchStart,
+                      maxTime: branchEnd,
                     }" />
                 </div>
                 <VRow class="w-50 mx-2 my-0" :justify="$vuetify.display.smAndDown ? 'center' : 'start'">

@@ -5,6 +5,7 @@ import {
   kuwaitValidator,
   requiredValidator,
   betweenValidator,
+confirmedValidator,
 } from "@validators";
 import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
@@ -98,7 +99,7 @@ onMounted(() => {
               <AppTextField
                 :rules="[
                   requiredValidator,
-                  betweenValidator(form.new_password?.length, 4, 8),
+                  // betweenValidator(form.new_password?.length, 4, 8),
                 ]"
                 style="width: 100%"
                 class="ps-3 w-50"
@@ -109,8 +110,8 @@ onMounted(() => {
             <VRow class="mt-10" justify="space-between" align="start">
               <AppTextField
                 :rules="[
-                  requiredValidator,
-                  betweenValidator(form.password_confirmation?.length, 4, 8),
+                  requiredValidator
+                  // betweenValidator(form.password_confirmation?.length, 4, 8),
                 ]"
                 style="width: 100%"
                 class="pe-3 w-50"

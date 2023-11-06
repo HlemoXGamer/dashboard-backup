@@ -69,9 +69,11 @@ const form = ref({
   area: [],
   payment: [],
   category: [],
-  product: []
+  product: [],
+  orderId: ""
 });
-const statuses = ref([
+const isAllProductsSelected = computed(() => { return form.value.product.length == products.value.length });
+const statuses = computed(() => [
   { name: t("Created"), value: "created" },
   { name: t("Paid"), value: "paid" },
   { name: t("In Progress"), value: "in_progress" },
@@ -111,6 +113,10 @@ const handlePageUpdate = (n) => {
       delete filters?.status
       delete filters?.from
       delete filters?.to
+    }
+    if(isAllProductsSelected.value == true){
+      delete filters.product;
+      formData.append("allProducts", "");
     }
     Object.entries(filters).forEach(([key, value]) => {
       formData.append(key, value);
@@ -214,6 +220,18 @@ const getFilters = () => {
   return { filters };
 };
 
+
+const selectAllProducts = () => {
+  if(form.value.product.length == products.value.length){
+    // isAllProductsSelected.value = false;
+    form.value.product = [];
+  }else{
+    let allProducts = products.value.map(product => product.id).filter(id => !form.value.product.includes(id));
+    form.value.product.push(...allProducts);
+    // isAllProductsSelected.value = true;
+  }
+}
+
 const snakeToCamel = (snakeCaseString) => {
     return snakeCaseString.replace(/_([a-z])/g, function (match, group) {
         return group.toUpperCase();
@@ -238,6 +256,10 @@ const search = (filters) => {
       delete filters?.from
       delete filters?.to
     }
+  if(isAllProductsSelected.value == true){
+    delete filters.product;
+    formData.append("allProducts", "");
+  }
   Object.entries(filters).forEach(([key, value]) => {
     formData.append(key, value);
   });
@@ -262,7 +284,7 @@ const search = (filters) => {
 
 const clearFilters = () => {
   isFiltered.value = false;
-
+  // isAllProductsSelected.value = false;
   form.value = {
     branch: [],
     status: [],
@@ -299,7 +321,9 @@ const exportExcel = () => {
     ] = `${sortedBy.value[0].order}-${sortedBy.value[0].key}`;
   }
   
-  getFilters().filters.forEach(([key, value]) => {
+  const filters = getFilters().filters; // Access filters object
+
+  Object.entries(filters).forEach(([key, value]) => {
     excelFilters[key] = value;
   })
 
@@ -307,15 +331,19 @@ const exportExcel = () => {
     excelFilters.status.forEach(status => {
       let statusName = snakeToCamel(status);
       if(excelFilters.from){
-        formData.append(`${statusName}From`, excelFilters.from)
+        excelFilters[`${statusName}From`] = excelFilters.from;
       }
       if(excelFilters.to){
-        formData.append(`${statusName}To`, excelFilters.to)
+        excelFilters[`${statusName}To`] = excelFilters.to;
       }
     })
       delete excelFilters?.status
       delete excelFilters?.from
       delete excelFilters?.to
+    }
+    if(isAllProductsSelected.value == true){
+      delete excelFilters.product;
+      excelFilters["allProducts"] = "";
     }
 
   loading.value = true;
@@ -327,7 +355,7 @@ const exportExcel = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "reports-report.xlsx");
+      link.setAttribute("download", "custom-report.xlsx");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -338,6 +366,9 @@ const exportExcel = () => {
 const filters = computed(() => {
   return Object.keys(getFilters().filters);
 });
+const hasProducts = computed(() => {
+  return (Object.keys(getFilters().filters).includes("product") || Object.keys(getFilters().filters).includes("category")) && isFiltered.value === true && gettingReports.value === false;
+})
 
 onMounted(() => {
   if(userRole == "admin"){
@@ -442,12 +473,22 @@ onMounted(() => {
               <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
                 justify="space-between">
                 <VCombobox prepend-inner-icon="tabler-package" v-model="form.product" multiple :items="products" item-value="id"
-                  item-title="name_en" :return-object="false" :placeholder="$t('Select a Product')" class="mx-2 flex-grow-1"
-                  :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                  item-title="name_en" :return-object="false" :placeholder="$t('Select a Product')" class="mx-2 flex-grow-1 products"
+                  :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
+                  <template #prepend-item>
+                    <VBtn v-if="!isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
+                      {{ $t("Select All") }}
+                    </VBtn>
+                    <VBtn v-if="isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
+                      {{ $t("Unselect All") }}
+                    </VBtn>
+                  </template>
+                </VCombobox>
                 <VCombobox prepend-inner-icon="tabler-bookmark" multiple v-model="form.category" :items="categories"
                   item-value="id" item-title="name_en" :return-object="false" :placeholder="$t('Select a Category')"
                   class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
                   :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                  <AppTextField placeholder="Order Number" prepend-inner-icon="tabler-number" class="flex-grow-1" v-model="form.orderId"/>
               </VRow>
             </VCol>
             <VCol cols="12" class="mt-2 v-col-sm-12 v-col-md-2 v-col-lg-2">
@@ -462,7 +503,7 @@ onMounted(() => {
             </VCol>
           </VRow>
 
-          <CustomizedReportsTable :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
+          <CustomizedReportsTable :hasProducts="hasProducts" :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
             @update-sort-by="handleUpdateSortBy" @update-page-n="handlePageUpdate" />
         </VCol>
       </VWindowItem>
@@ -470,7 +511,7 @@ onMounted(() => {
       <VWindowItem value="layouts" class="py-7">
         <VCol style="background-color: rgb(var(--v-theme-surface));" class="rounded pb-5">
           <p class="text-h4 pt-3 pb-0 mb-3 px-3">{{ $t('layouts_reports') }}</p>
-          <LayoutsReportsTable :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
+          <LayoutsReportsTable :hasProducts="hasProducts" :gettingReports="gettingReports" :meta="meta" :reports="reports" :filters="getFilters()"
             @update-sort-by="handleUpdateSortBy" @update-page-n="handlePageUpdate" />
         </VCol>
       </VWindowItem>
@@ -483,14 +524,15 @@ meta:
   requiresAuth: true
   roles: ["admin", "logistic", "operation", "finance", "agent"]
 </route>
-<style lang="scss">
-#order-list {
-  .order-list-actions {
-    inline-size: 8rem;
+<style lang="scss" scoped>
+
+  :deep(.products){
+    .v-field__input{
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-wrap: nowrap;
+    }
   }
 
-  .order-list-filter {
-    inline-size: 12rem;
-  }
-}
 </style>

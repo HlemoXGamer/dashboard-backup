@@ -25,6 +25,9 @@ const props = defineProps({
         {{ props.order.address_city }} , {{ props.order.address_area_name }}
       </p>
       <p class="text-h6 pt-3 mb-0">
+        {{ $t('Street Name') }} {{ props.order.address_street_name }}
+      </p>
+      <p class="text-h6 pt-3 mb-0">
         {{ $t('Building Number') }} {{ props.order.address_building_no }}, {{ $t('Floor') }}
         {{ props.order.address_floor }}, {{ $t('Apartment') }}
         {{ props.order.address_apartment }}

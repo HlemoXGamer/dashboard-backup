@@ -22,6 +22,9 @@ const props = defineProps({
   deliveryCost: {
     default: "",
   },
+  extraCost: {
+    default: '',
+  }
 });
 const discounts = { "fixed" : "KWD", "percentage": "%" };
 </script>
@@ -89,6 +92,11 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
               <p class="mb-2">{{ deliveryCost }} KWD</p>
             </VRow>
 
+            <VRow align="center" justify="space-between" class="mt-5">
+              <p class="mb-2">{{ $t('Extra Cost') }}</p>
+              <p class="mb-2">{{ extraCost }} KWD</p>
+            </VRow>
+
             <VRow>
               <VDivider
                 :color="$vuetify.theme.current.dark ? '#B3BFFFFF' : 'primary'"
@@ -97,7 +105,7 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
 
             <VRow align="center" justify="space-between" class="mt-5">
               <p class="mb-2">{{ $t('Total') }}</p>
-              <p class="mb-2">{{ total }} KWD</p>
+              <p class="mb-2">{{ total + extraCost }} KWD</p>
             </VRow>
 
             <VRow v-if="newtotal">

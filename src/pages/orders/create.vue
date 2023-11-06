@@ -29,6 +29,10 @@ import { useToast } from "vue-toastification";
 import { VForm } from "vuetify/components/VForm";
 import router from "@/router";
 import { useI18n } from "vue-i18n"
+
+const date = new Date();
+const today = ref(new Date().toISOString());
+
 const $useI18n = useI18n()
 const t = $useI18n.t;
 const langIdentifier = computed(() => {
@@ -52,6 +56,7 @@ const branchesLoading = ref(false);
 const productsLoading = ref(false);
 const areasLoading = ref(false);
 const imageDialog = ref(false);
+const ExtraFlavorsDialog = ref(false);
 const noteDialog = ref(false);
 const employeeLoading = ref(false);
 const products = ref([]);
@@ -59,8 +64,6 @@ const productCount = ref(1);
 const selectedProduct = ref();
 const orderProducts = ref([]);
 const total = ref(0);
-const startTime = ref();
-const endTime = ref();
 const voucherLoading = ref(false);
 const timeKey = ref(0);
 const addressDialog = ref(false);
@@ -71,6 +74,12 @@ const discountType = ref("");
 const newTotal = ref(0);
 const employeeCode = ref("");
 const isAnEmployee = ref(false);
+const branchStart = ref(null);
+const branchEnd = ref(null);
+const isClosed = ref(false);
+const branchStartBackup = ref(null);
+const dateKey = ref(1);
+const isBranchSelected = false;
 const form = ref({
   is_pickup: true,
   products: [],
@@ -91,6 +100,8 @@ const form = ref({
   branch_id: null,
   v_code: "",
   employee_code: "",
+  extra: '',
+  flavor: '',
 });
 
 const imageErrors = ref([]);
@@ -124,7 +135,10 @@ const _getRestaurantBranches = () => {
     branchesLoading.value = true;
     branches.value = data.data.filter((branch) => branch.is_active === 1);
     availableBranches.value = data.data.filter((branch) => branch.id === 2);
-    startTime.value = availableBranches.value[0].start;
+    branchStart.value = availableBranches.value[0].start;
+    branchStartBackup.value = branchStart.value;
+    branchEnd.value = availableBranches.value[0].end;
+    // startTime.value = availableBranches.value[0].start;
     timeKey.value += 1;
     branchesLoading.value = false;
   })
@@ -199,7 +213,10 @@ const _getBranches = () => {
   getBranches().then(({ data }) => {
     branches.value = data.data.filter((branch) => branch.is_active === 1);
     availableBranches.value = data.data.filter((branch) => branch.id === 2);
-    startTime.value = availableBranches.value[0].start;
+    // startTime.value = availableBranches.value[0].start;
+    branchStart.value = availableBranches.value[0].start;
+    branchStartBackup.value = branchStart.value;
+    branchEnd.value = availableBranches.value[0].end;
     timeKey.value += 1;
     branchesLoading.value = false;
   });
@@ -314,7 +331,6 @@ const addProduct = () => {
         product_id: product.id,
         quantity: parseInt(productCount.value),
         images: [],
-        binary: [],
         notes: [],
       });
       for (let i = 0; i < productCount.value; i++) {
@@ -328,7 +344,6 @@ const addProduct = () => {
         product_id: product.id,
         quantity: parseInt(productCount.value),
         images: [],
-        binary: [],
       });
       product.images = 0;
       imageErrors.value.push({ product_id: product.id });
@@ -415,8 +430,9 @@ const updateStartEndTime = () => {
   const branch = availableBranches.value.find(
     (branch) => branch.id === form.value.branch_id);
 
-    endTime.value = branch?.end;
-    startTime.value = new Date().toTimeString().slice(0, 5);
+    // endTime.value = branch?.end;
+    // startTime.value = new Date().toTimeString().slice(0, 5);
+    // branchStart.value = new Date().toTimeString().slice(0, 5);
 
     timeKey.value += 1;
 
@@ -431,29 +447,41 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-const _updateTime = async () => {
-  let { data } = await useTime();
-  let date = new Date(data.utc_datetime);
-  _updateBranches();
+const _updateTime = () => {
+  const date = new Date();
+  const today = date.toISOString();
+  _updateBranches()
+
   const branch = availableBranches.value.find(branch => branch.id == form.value.branch_id);
   if (form.value.delivery_date == formatDate(date)) {
-    startTime.value = branch.start ?? null;
-    endTime.value = branch.end ?? null;
     const currentHour = date.getHours();
     const currentMinute = date.getMinutes();
-    const [startHour, startMinute] = startTime.value.split(':')?.map(Number);
-    const [endHour, endMinute] = endTime.value.split(':')?.map(Number);
+    const [startHour, startMinute] = branchStart.value.split(':')?.map(Number);
+    const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
     if (
-        (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) ||
-        (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+      (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
+        // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
         ) {
-          startTime.value = null;
+          isClosed.value = true;
         } else {
-          startTime.value = new Date().toTimeString().slice(0, 5);
-    }
-  }else {
-    startTime.value = branch?.start;
-    endTime.value = branch?.end;
+          if(currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)){
+            branchStart.value = branchStartBackup.value;
+          }else{
+            const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
+            const _currentHour = _date.getHours();
+            const _currentMinute = _date.getMinutes();
+            const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
+            const [_endHour, _endMinute] = branchEnd.value.split(':')?.map(Number);
+            if(_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)){
+              isClosed.value = true;
+            }else{
+              branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+            }
+          }
+        }
+  } else {
+    isClosed.value = false;
+    branchStart.value = branchStartBackup.value;
   }
 
   timeKey.value += 1;
@@ -461,7 +489,6 @@ const _updateTime = async () => {
 };
 
 const addDetails = () => {
-  // const address = customerAddresses.value.find(addr => addr.id === selectedAddress.value);
   const address = customerAddresses.value;
   form.value.address_apartment = address?.apartment;
   form.value.block_no = address?.block_no;
@@ -493,20 +520,21 @@ const deleteProduct = (product) => {
 };
 
 const _createOrder = async () => {
-    if(form.value.branch_id !== null){
-      let { data } = await useTime();
-      const end = branches.value.find(branch => branch.id === form.value.branch_id).end;
-      const [targetHour, targetMinute] = end.split(":").map(Number);
-      const currentDate = new Date(data.utc_datetime);
-      const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), targetHour, targetMinute);
-
-      if (currentDate > targetDate) {
-        toast.error("The Branch is either Closed or not Selected");
-      }
-      return;
-    };
+  if (form.value.is_pickup === false) {
+    const currentHour = new Date().getHours();
+    const currentMinute = new Date().getMinutes();
+    const [startHour, startMinute] = branchStartBackup.value.split(':')?.map(Number);
+    const [endHour, endMinute] = branchEnd.value.split(':')?.map(Number);
+    if (
+        (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute)) || (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
+    )
+  {
+    return toast.error("The Branch is currently closed.")
+  }
+}
+  
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
-    if (isValid) {
+  if (isValid) {
   let formData = new FormData();
   formData.append("branch_id", form.value.branch_id);
   formData.append("is_pickup", form.value.is_pickup);
@@ -533,12 +561,14 @@ const _createOrder = async () => {
   formData.append("address_street_name", form.value.address_street_name);
   formData.append("v_code", form.value.v_code);
   formData.append("employee_code", form.value.employee_code);
+  formData.append("extra", form.value.extra);
+  formData.append("flavor", form.value.flavor);
 
   form.value.products.forEach((product, index) => {
     formData.append(`products[${index}][product_id]`, product.product_id);
     formData.append(`products[${index}][quantity]`, product.quantity);
     product.images?.forEach((image, img_index) => {
-      formData.append(`products[${index}][images][${img_index}]`, image);
+      formData.append(`products[${index}][images][${img_index}]`, image.file);
     });
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
@@ -625,6 +655,11 @@ const addImage = (product) => {
   currentProduct.value = product.id;
 };
 
+const addExtraFlavors = (product) => {
+  ExtraFlavorsDialog.value = true;
+  currentProduct.value = product.id;
+}
+
 const addNote = (product) => {
   noteDialog.value = true;
   currentProduct.value = product;
@@ -634,16 +669,13 @@ const addFile = async (file) => {
   let orderProduct = orderProducts.value.find(
     (product) => product.id == currentProduct.value,
   );
-  const img = file.target.files[0];
-  form.value.products
-    .find((product) => product.product_id == currentProduct.value)
-    .images.push(img);
-  await toBase64(img).then((base64) => {
-    form.value.products
-      .find((product) => product.product_id == currentProduct.value)
-      .binary.push(base64);
+  let productImages = form.value.products
+    .find((product) => product.product_id == currentProduct.value);
+  const img = { file: file.target.files[0], id: productImages.images.length, binary: "" };
+  await toBase64(img.file).then((base64) => {
+    img.binary = base64;
   });
-
+  productImages.images.push(img);
   orderProduct.images += 1;
 
   if (orderProduct.images == orderProduct.quantity) {
@@ -655,6 +687,8 @@ const addFile = async (file) => {
       ),
     );
   }
+
+  file.target.value = "";
 };
 
 const deleteImage = (image) => {
@@ -679,16 +713,10 @@ const deleteImage = (image) => {
       imageErrors.value.push({ product_id: orderProduct.id });
     }
   }
-  product.binary.splice(product.binary.indexOf(image), 1);
-  product.images.forEach(async (img) => {
-    await toBase64(img).then((base64) => {
-      if (base64 == image) {
-        product.images.splice(product.images.indexOf(img), 1);
-      }
-    });
-  });
+  product.images.splice(product.images.indexOf(image), 1);
 };
 
+const currentDay = ref(new Date().toISOString());
 onMounted(() => {
   if (userRole == "admin") {
     _getBranches();
@@ -701,7 +729,20 @@ onMounted(() => {
     _getRestaurantBranches();
     _getRestaurantServiceCost();
   }
+
+  let interval = setInterval(() => {
+    today.value = new Date().toISOString();
+    if(new Date(currentDay.value).getDate() !== new Date(today.value).getDate()){
+      currentDay.value = today.value;
+      dateKey.value = dateKey.value * 2;
+    }
+  }, 1000)
+
+  onBeforeUnmount(() =>{
+    clearInterval(interval);
+  })
 });
+
 </script>
 <template>
   <div>
@@ -756,7 +797,9 @@ onMounted(() => {
             :style="
               form.products.find(
                 (product) => product.product_id == currentProduct,
-              ).images.length == 1
+              ).images.length == form.products.find(
+                (product) => product.product_id == currentProduct,
+              ).quantity * 10
                 ? 'pointer-events: none;'
                 : ''
             "
@@ -786,7 +829,7 @@ onMounted(() => {
           <div
             v-for="image in form.products.find(
               (product) => product.product_id == currentProduct,
-            ).binary"
+            ).images"
             style="width: 120px; height: 120px; border: 2px solid lightgrey"
             class="product_image px-0 py-0 rounded mx-1 mt-4 position-relative d-flex align-center justify-center"
           >
@@ -798,7 +841,7 @@ onMounted(() => {
             /></VBtn>
             <div class="w-100 h-100" style="overflow: hidden">
               <img
-                :src="image"
+                :src="image.binary"
                 style="object-fit: cover"
                 class="w-100 h-100"
                 alt="product_image"
@@ -806,11 +849,55 @@ onMounted(() => {
             </div>
           </div>
         </VCardText>
-        <!-- <VCardText class="d-flex justify-end gap-3 flex-wrap">
-        <VBtn @click="imageDialog = false">
-          Save
-        </VBtn>
-      </VCardText> -->
+      </VCard>
+    </VDialog>
+    <VDialog v-model="ExtraFlavorsDialog" persistent class="v-dialog-sm">
+      <DialogCloseBtn @click="ExtraFlavorsDialog = !ExtraFlavorsDialog" />
+
+      <VCard title="Additional Options">
+        <VCardText>
+          <VRow>
+            <VCol>
+                <VSelect
+                  prepend-inner-icon="tabler-building-store"
+                  placeholder="Flavor"
+                  :label="$t('Flavor')"
+                  v-model="form.flavor"
+                  :items="[]"
+                  item-value="id"
+                  item-title="name"
+                  variant="outlined"
+                  :return-object="false"
+                  class="flex-grow-1 my-1 mx-2"
+                />
+            </VCol>
+            <VCol>
+              <VCombobox
+                prepend-inner-icon="tabler-package"
+                v-model="form.extra"
+                :items="[]"
+                item-title="name"
+                item-value="id"
+                variant="outlined"
+                :label="$t('Extra')"
+                class="flex-grow-1 my-1 mx-2"
+                multiple
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VCardText class="d-flex justify-end gap-3 flex-wrap">
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            @click="ExtraFlavorsDialog = false"
+            :disabled="loadingDialog"
+          >
+            Cancel
+          </VBtn>
+          <VBtn @click="ExtraFlavorsDialog = false" :loading="loadingDialog"> OK </VBtn>
+        </VCardText>
       </VCard>
     </VDialog>
 
@@ -932,6 +1019,7 @@ onMounted(() => {
                   @delete="deleteProduct"
                   @add-image="addImage"
                   @add-note="addNote"
+                  @add-extra-flavors="addExtraFlavors"
                 />
               </VRow>
             </VCol>
@@ -993,12 +1081,13 @@ onMounted(() => {
             <p class="text-h4 pt-3 mb-1">{{ $t('User Address') }}</p>
             <VCol>
               <VRow justify="space-between" align="end">
-                <VSelect
+                <VCombobox
                   v-if="userRole == 'admin'"
                   clearable
                   prepend-inner-icon="tabler-building-community"
                   :loading="areasLoading"
                   v-model="form.address_address_area"
+                  :return-object="false"
                   :items="areas"
                   item-value="name"
                   item-title="name"
@@ -1009,7 +1098,7 @@ onMounted(() => {
                   class="flex-grow-0 my-1 w-50 mx-2"
                   @update:model-value="updateStartEndTime()"
                 />
-                <VSelect
+                <VCombobox
                   v-if="userRole == 'restaurant'"
                   clearable
                   prepend-inner-icon="tabler-building-community"
@@ -1018,6 +1107,7 @@ onMounted(() => {
                   :items="areas"
                   item-value="name"
                   item-title="name"
+                  :return-object="false"
                   style="width: 100%"
                   variant="outlined"
                   :rules="[requiredValidator]"
@@ -1080,7 +1170,7 @@ onMounted(() => {
           >
             <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
-              <VChip v-if="startTime == null && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
             </VRow>
             <VCol>
               <VRow
@@ -1096,12 +1186,13 @@ onMounted(() => {
                     v-model="form.delivery_date"
                     :placeholder="$t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: new Date().toISOString() }"
+                    :config="{ minDate: today }"
+                    :key="dateKey"
                     @update:model-value="updateStartEndTime"
                   />
                   <AppDateTimePicker
                     :rules="[requiredValidator]"
-                    :disabled="!form.is_pickup || startTime == null"
+                    :disabled="!form.is_pickup || isClosed || isBranchSelected"
                     prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time"
                     :placeholder="$t('Enter your time')"
@@ -1111,8 +1202,8 @@ onMounted(() => {
                       enableTime: true,
                       noCalendar: true,
                       dateFormat: 'H:i',
-                      minTime: startTime,
-                      maxTime: endTime,
+                      minTime: branchStart,
+                      maxTime: branchEnd,
                     }"
                   />
                 </div>
@@ -1123,11 +1214,12 @@ onMounted(() => {
                     v-model="form.delivery_date"
                     :placeholder="t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: new Date().toISOString() }"
+                    :config="{ minDate: today }"
+                    :key="dateKey"
                     @update:model-value="updateStartEndTime"
                   />
                   <AppDateTimePicker
-                    :disabled="!form.is_pickup || startTime == null"
+                    :disabled="!form.is_pickup || isClosed"
                     prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time"
                     :placeholder="t('Enter your time')"
@@ -1137,8 +1229,8 @@ onMounted(() => {
                       enableTime: true,
                       noCalendar: true,
                       dateFormat: 'H:i',
-                      minTime: startTime,
-                      maxTime: endTime,
+                      minTime: branchStart,
+                      maxTime: branchEnd,
                     }"
                   />
                 </div>

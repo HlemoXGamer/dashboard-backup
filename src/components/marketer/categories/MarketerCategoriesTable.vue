@@ -90,6 +90,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  loading: {
+    type: Boolean,
+    default: false
+  }
 });
 </script>
 
@@ -117,7 +121,7 @@ const props = defineProps({
       </VCardText>
     </VCard>
   </VDialog>
-
+  <VCard elevation="0" rounded="0" class="px-0 mb-0 pb-5 mt-10 pt-2" :loading="loading">
   <VDataTable
     :items="categories"
     :headers="headers"
@@ -125,6 +129,7 @@ const props = defineProps({
     :items-per-page="15"
     :custom-filter="customFilter"
     class="pb-5 mt-10"
+    :loading="loading"
   >
     <template #item.status="{ item }">
       <VChip
@@ -148,4 +153,5 @@ const props = defineProps({
       </div>
     </template>
   </VDataTable>
+</VCard>
 </template>

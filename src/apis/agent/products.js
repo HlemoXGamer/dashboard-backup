@@ -6,3 +6,7 @@ export const removeImage = (data) => service.post("products/images", data);
 export function getOrderProducts() {
   return service.get("/agent/products/order_product");
 }
+
+export function getStatsProduct() {
+  return service.get("/stats/product");
+}

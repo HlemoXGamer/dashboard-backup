@@ -124,14 +124,15 @@ export const numericValidator = (value) => {
   if (isEmpty(value)) return true;
   if (Array.isArray(value))
     return (
-      value.every((val) => /^[1-9]\d*(\.\d+)?$/.test(String(val))) ||
+      value.every((val) => /^([1-9]\d*|0)(\.\d+)?$/.test(String(val))) ||
       "This field must be a number"
     );
 
   return (
-    /^[1-9]\d*(\.\d+)?$/.test(String(value)) || "This field must be a number"
+    /^([1-9]\d*|0)(\.\d+)?$/.test(String(value)) || "This field must be a number"
   );
 };
+
 
 // 👉 Arabic Validator
 export const arabicValidator = (value) => {

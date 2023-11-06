@@ -16,7 +16,7 @@ import { onMounted } from 'vue';
 const $useI18n = useI18n()
 const t = $useI18n.t;
 
-const statuses = [
+const statuses = computed(() => [
     {
         title: t("Custom"),
         value: "custom",
@@ -32,7 +32,7 @@ const statuses = [
     {
         title: t("Today"),
         value: "today",
-    }]
+    }])
 
 
 const headers = computed(() => [

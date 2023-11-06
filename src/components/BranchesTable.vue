@@ -2,16 +2,16 @@
 import { remove as removeBranch } from "@/apis/admin/branches";
 import { useToast } from "vue-toastification";
 import { VDataTable } from "vuetify/labs/VDataTable";
-import { useI18n } from "vue-i18n"
+import { useI18n } from "vue-i18n";
 const $useI18n = useI18n();
 const t = $useI18n.t;
 const langIdentifier = computed(() => {
-    if ($useI18n.locale.value === 'en') {
-      return 'name_en';
-    } else if ($useI18n.locale.value === 'ar') {
-      return 'name_ar';
-    }
-  });
+  if ($useI18n.locale.value === "en") {
+    return "name_en";
+  } else if ($useI18n.locale.value === "ar") {
+    return "name_ar";
+  }
+});
 const branchData = ref([]);
 const loadingDialog = ref(false);
 const toast = useToast();
@@ -19,47 +19,47 @@ const deleteDialog = ref(false);
 const headers = computed(() => {
   let titles = [];
   titles.push(
-  {
-    title: t("Name"),
-    key: langIdentifier,
-  },
-  {
-    title: t("City"),
-    key: "city.name",
-  },
-  {
-    title: t("Areas"),
-    key: "areas",
-  },
-  {
-    title:t("Phone Number"),
-    key: "phone_no",
-  },
-  {
-    title: t("Created Date"),
-    key: "created_at",
-  },
-);
-
-if (!props.performance) {
-  titles.push(
     {
-      title: t("Status"),
-      key: "status",
+      title: t("Name"),
+      key: langIdentifier,
     },
     {
-      title: t("Actions"),
-      key: "actions",
+      title: t("City"),
+      key: "city.name",
+    },
+    {
+      title: t("Areas"),
+      key: "areas",
+    },
+    {
+      title: t("Phone Number"),
+      key: "phone_no",
+    },
+    {
+      title: t("Created Date"),
+      key: "created_at",
     },
   );
-} else {
-  titles.push({
-    title: t("Actions"),
-    key: "actions",
-  });
-}
+
+  if (!props.performance) {
+    titles.push(
+      {
+        title: t("Status"),
+        key: "status",
+      },
+      {
+        title: t("Actions"),
+        key: "actions",
+      },
+    );
+  } else {
+    titles.push({
+      title: t("Actions"),
+      key: "actions",
+    });
+  }
   return titles;
-})
+});
 
 const resolveStatusVariant = (status) => {
   if (parseInt(status) !== 0) {
@@ -150,8 +150,8 @@ const props = defineProps({
   },
   loading: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 </script>
 
@@ -166,7 +166,9 @@ const props = defineProps({
   >
     <DialogCloseBtn @click="deleteDialog = !deleteDialog" />
     <VCard :title="$t('Delete Branch')">
-      <VCardText> {{ $t("Are you sure that you want to delete this Branch?") }} </VCardText>
+      <VCardText>
+        {{ $t("Are you sure that you want to delete this Branch?") }}
+      </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
         <VBtn
@@ -177,54 +179,67 @@ const props = defineProps({
         >
           {{ $t("Cancel") }}
         </VBtn>
-        <VBtn @click="deleteBranch()" :loading="loadingDialog"> {{ $t("Delete") }} </VBtn>
+        <VBtn @click="deleteBranch()" :loading="loadingDialog">
+          {{ $t("Delete") }}
+        </VBtn>
       </VCardText>
     </VCard>
   </VDialog>
 
-<VCard elevation="0" rounded="0" class="px-0 mb-0 pb-5 mt-10 pt-2" :loading="loading">
-  <VDataTable
-    :items="props.branches"
-    :headers="headers"
-    :search="props.search"
-    :items-per-page="15"
-    :custom-filter="customFilter"
+  <VCard
+    elevation="0"
+    rounded="0"
+    class="px-0 mb-0 pb-5 mt-10 pt-2"
+    :loading="loading"
   >
-    <template #item.areas="{ item }">
-      <AreasDialog
-        v-if="item.raw.areas[0]"
-        :name="item.raw.areas[0][langIdentifier]"
-        :areas="item.raw.areas"
-      />
-    </template>
-
-    <template #item.status="{ item }">
-      <VChip
-        :color="resolveStatusVariant(item.raw.is_active).color"
-        :class="`text-${resolveStatusVariant(item.raw.is_active).color}`"
-        size="small"
-        class="font-weight-medium"
-      >
-        {{ resolveStatusVariant(item.raw.is_active).text }}
-      </VChip>
-    </template>
-
-    <template #item.actions="{ item }">
-      <div class="d-flex gap-1" v-if="!props.performance">
-        <IconBtn @click="$router.push(`branches/edit/${item.raw.id}`)">
-          <VIcon icon="mdi-pencil-outline" />
-        </IconBtn>
-        <IconBtn>
-          <VIcon icon="mdi-delete-outline" @click="_deleteDialog(item.value)" />
-        </IconBtn>
-      </div>
-      <IconBtn v-if="props.performance">
-        <VIcon
-          icon="mdi-eye"
-          @click="$router.push(`performance/${item.raw.id}`)"
+    <VDataTable
+      :items="props.branches"
+      :headers="headers"
+      :search="props.search"
+      :items-per-page="15"
+      :custom-filter="customFilter"
+    >
+      <template #item.areas="{ item }">
+        <AreasDialog
+          v-if="item.raw.areas[0]"
+          :name="item.raw.areas[0][langIdentifier]"
+          :areas="item.raw.areas"
         />
-      </IconBtn>
-    </template>
-  </VDataTable>
+      </template>
+
+      <template #item.status="{ item }">
+        <VChip
+          :color="resolveStatusVariant(item.raw.is_active).color"
+          :class="`text-${resolveStatusVariant(item.raw.is_active).color}`"
+          size="small"
+          class="font-weight-medium"
+        >
+          {{ resolveStatusVariant(item.raw.is_active).text }}
+        </VChip>
+      </template>
+
+      <template #item.actions="{ item }">
+        <div class="d-flex gap-1" v-if="!props.performance">
+          <IconBtn @click="$router.push(`/branches/view/${item.raw.id}`)">
+            <VIcon icon="mdi-eye" />
+          </IconBtn>
+          <IconBtn @click="$router.push(`branches/edit/${item.raw.id}`)">
+            <VIcon icon="mdi-pencil-outline" />
+          </IconBtn>
+          <IconBtn>
+            <VIcon
+              icon="mdi-delete-outline"
+              @click="_deleteDialog(item.value)"
+            />
+          </IconBtn>
+        </div>
+        <IconBtn v-if="props.performance">
+          <VIcon
+            icon="mdi-eye"
+            @click="$router.push(`performance/${item.raw.id}`)"
+          />
+        </IconBtn>
+      </template>
+    </VDataTable>
   </VCard>
 </template>
