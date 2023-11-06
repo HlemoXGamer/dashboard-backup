@@ -50,7 +50,7 @@ const form = ref({
   price: "",
   extras: [],
   flavors: [],
-  quantity: 1,
+  extra_quantity: 1,
   is_pre: 0,
 });
 const binaryImages = ref([]);
@@ -88,7 +88,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
-          quantity,
+          extra_quantity,
           is_pre
         } = res.data.data;
 
@@ -109,7 +109,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
-          quantity,
+          extra_quantity,
           is_pre
         };
         form.value.categories = res.data.data.categories.map(
@@ -136,7 +136,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
-          quantity,
+          extra_quantity,
           is_pre
         } = res.data.data;
 
@@ -158,7 +158,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
-          quantity,
+          extra_quantity,
           is_pre
         };
 
@@ -220,7 +220,7 @@ const _updateProduct = async () => {
         formData.append(`extra_flavors[${index}]`, extra_flavor)
       });
 
-      formData.append("quantity", form.value.quantity);
+      formData.append("quantity", form.value.extra_quantity);
 
       // Append extra_flavors to the formData
  
@@ -403,10 +403,10 @@ onMounted(() => {
                 ></VCombobox>
                 <AppTextField
                   prepend-inner-icon="tabler-dna-2"
-                  v-model="form.quantity"
+                  v-model="form.extra_quantity"
                   :rules="[requiredValidator]"
                   class="flex-grow-1 ml-1 mt-3"
-                  :placeholder="$t('Quantity')"
+                  :placeholder="$t('extra_quantity')"
                 ></AppTextField>
               </VRow>
         </VCol>

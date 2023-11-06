@@ -39,7 +39,7 @@ const form = ref({
   status: 0,
   extra: [],
   flavor: [],
-  quantity:1,
+  extra_quantity:1,
   is_pre: 0,
 });
 const refVForm = ref();
@@ -81,7 +81,7 @@ const _addProduct = async () => {
         formData.append(`extra_flavors[${index}]`, extra_flavor);
       });
 
-      formData.append("quantity", form.value.quantity);
+      formData.append("quantity", form.value.extra_quantity);
 
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
@@ -265,10 +265,10 @@ onMounted(() => {
                 ></VCombobox>
                 <AppTextField
                   prepend-inner-icon="tabler-dna-2"
-                  v-model="form.quantity"
+                  v-model="form.extra_quantity"
                   :rules="[requiredValidator]"
                   class="flex-grow-1 ml-1 mt-3"
-                  :placeholder="$t('Quantity')"
+                  :placeholder="$t('extra_quantity')"
                 ></AppTextField>
               </VRow>
           </VCol>

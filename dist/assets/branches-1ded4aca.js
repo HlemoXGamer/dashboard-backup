@@ -1,0 +1,1 @@
+import{bb as r,ba as e}from"./index-d6ee0790.js";let{get:a,show:c,update:o,create:n,remove:i}=r("/branches");function b(){return e.get("/branch/service-cost")}function u(s){return e.post("/branch_service",s)}export{a,c as b,n as c,b as g,i as r,u as s,o as u};
