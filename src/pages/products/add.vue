@@ -39,6 +39,7 @@ const form = ref({
   status: 0,
   extra: [],
   flavor: [],
+  quantity:1,
   is_pre: 0,
 });
 const refVForm = ref();
@@ -74,8 +75,13 @@ const _addProduct = async () => {
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
       formData.append("status", form.value.status);
-      formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
+      // formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
       formData.append("is_pre", form.value.is_pre);
+      form.value.extras.concat(form.value.flavors).forEach((extra_flavor, index) => {
+        formData.append(`extra_flavors[${index}]`, extra_flavor);
+      });
+
+      formData.append("quantity", form.value.quantity);
 
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
@@ -235,16 +241,16 @@ onMounted(() => {
                   :label="$t('Preparation Time')"
                 ></AppTextField>
               </VRow>
-              <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
+               <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   multiple
                   :return-object="false"
-                  :items="exters"
+                  :items="extras"
                   item-value="id"
                   item-title="name"
                   v-model="form.extra"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ml-1 mt-3"
                   :label="$t('Select Extra')"
                 ></VCombobox>
                 <VCombobox
@@ -254,9 +260,16 @@ onMounted(() => {
                   item-value="id"
                   item-title="name"
                   v-model="form.flavor"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ml-1 mt-3"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
+                <AppTextField
+                  prepend-inner-icon="tabler-dna-2"
+                  v-model="form.quantity"
+                  :rules="[requiredValidator]"
+                  class="flex-grow-1 ml-1 mt-3"
+                  :placeholder="$t('Quantity')"
+                ></AppTextField>
               </VRow>
           </VCol>
         </VCol>

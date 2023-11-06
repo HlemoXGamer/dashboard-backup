@@ -50,23 +50,9 @@ const form = ref({
   price: "",
   extras: [],
   flavors: [],
+  quantity: 1,
   is_pre: 0,
 });
-
-
-// Initialize form.extras and form.flavors with quantity property
-form.extras = form.value.extras.map((extra) => ({
-  id: extra.id,
-  name: extra.name,
-  quantity: 0, // You can set the initial quantity to 0
-}));
-
-form.flavors = form.value.flavors.map((flavor) => ({
-  id: flavor.id,
-  name: flavor.name,
-  quantity: 1, // You can set the initial quantity to 0
-}));
-
 const binaryImages = ref([]);
 
 const getImage = async (file) => {
@@ -102,6 +88,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
+          quantity,
           is_pre
         } = res.data.data;
 
@@ -122,6 +109,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
+          quantity,
           is_pre
         };
         form.value.categories = res.data.data.categories.map(
@@ -148,6 +136,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
+          quantity,
           is_pre
         } = res.data.data;
 
@@ -169,6 +158,7 @@ const _showProduct = async () => {
           price,
           extras,
           flavors,
+          quantity,
           is_pre
         };
 
@@ -210,12 +200,6 @@ const _updateProduct = async () => {
     if (isValid) {
       loading.value = true;
 
-      // Prepare the extra_flavors data structure
-      const extraFlavors = form.value.extras.map((extra) => ({
-        id: extra.id,
-        quantity: extra.quantity || 1, // Set a default quantity of 1
-      }));
-
       let formData = new FormData();
       formData.append("code", form.value.code);
       formData.append("created_at", form.value.created_at);
@@ -232,15 +216,14 @@ const _updateProduct = async () => {
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
 
-      // form.value.extras.concat(form.value.flavors).forEach((extra_flavor, index) => {
-      //     formData.append(`extra_flavors[${index}]`, extra_flavor)
-      // })
+      form.value.extras.concat(form.value.flavors).forEach((extra_flavor, index) => {
+        formData.append(`extra_flavors[${index}]`, extra_flavor)
+      });
+
+      formData.append("quantity", form.value.quantity);
 
       // Append extra_flavors to the formData
-      extraFlavors.forEach((extraFlavor, index) => {
-        formData.append(`extra_flavors[${index}][id]`, extraFlavor.id);
-        formData.append(`extra_flavors[${index}][quantity]`, extraFlavor.quantity);
-      });
+ 
 
       formData.append("is_pre", form.value.is_pre);
       binaryImages.value.forEach((image, index) => {
@@ -396,7 +379,7 @@ onMounted(() => {
               :label="$t('Preparation Time')"
             ></AppTextField>
           </VRow>
-          <VRow v-if="userRole == 'admin'" class="mt-2" justify="space-between" align="center" style="gap: 5px">
+           <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   multiple
@@ -405,28 +388,9 @@ onMounted(() => {
                   item-value="id"
                   item-title="name"
                   v-model="form.extras"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ml-1 mt-3"
                   :label="$t('Select Extra')"
                 ></VCombobox>
-               
-  <!-- Display selected extras in a single row with name and quantity -->
- 
-  <!-- Display selected extras in a single row with name and quantity -->
-  <VRow v-for="(extra, index) in form.extras" :key="index">
-    <VTextField
-      :value="extra.name"
-      disabled
-      class="flex-grow-1 ml-1"
-      :label="$t('Extra Name')"
-    ></VTextField>
-    <AppTextField
-      v-model="extra.quantity"
-      :rules="[requiredValidator, numericValidator]"
-      class="flex-grow-1 ml-1"
-      :label="$t('Quantity')"
-    ></AppTextField>
-  </VRow>
-
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   :return-object="false"
@@ -434,9 +398,16 @@ onMounted(() => {
                   item-value="id"
                   item-title="name"
                   v-model="form.flavors"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ml-1 mt-3"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
+                <AppTextField
+                  prepend-inner-icon="tabler-dna-2"
+                  v-model="form.quantity"
+                  :rules="[requiredValidator]"
+                  class="flex-grow-1 ml-1 mt-3"
+                  :placeholder="$t('Quantity')"
+                ></AppTextField>
               </VRow>
         </VCol>
       </VCol>
