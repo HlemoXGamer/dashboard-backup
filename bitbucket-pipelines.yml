@@ -20,4 +20,4 @@ pipelines:
             - scp -r ./* $SSH_USER@164.92.88.138:/var/www/Sable/dashboard
             
              # Run npm run build after deploying
-            - ssh $SSH_USER@your_server_ip "cd /path/to/remote/directory && nvm use v14.21.3 && npm i && npm run build"
+            - ssh $SSH_USER@164.92.88.138 "cd /path/to/remote/directory && nvm use v14.21.3 && npm i && npm run build"
