@@ -8,9 +8,11 @@ pipelines:
           - node
         script:
           # - nvm use v14.21.3
+          - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          - chmod 600 ~/.ssh/id_rsa
           - npm install
           - npm run build
-          - pipe: atlassian/scp-deploy:1.1.0
+          - pipe: atlassian/scp-deploy:1.4.1
             variables:
               USER: 'root'
               SERVER: '164.92.88.138'
