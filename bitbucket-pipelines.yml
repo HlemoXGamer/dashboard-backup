@@ -12,7 +12,6 @@ pipelines:
 
             # Add the remote server to known hosts
             - ssh-keyscan -H 164.92.88.138 >> ~/.ssh/known_hosts
-
             # Deploy the entire project directory to the remote server
             - scp -r ./* $SSH_USER@164.92.88.138:/var/www/Sable/dashboard
 
