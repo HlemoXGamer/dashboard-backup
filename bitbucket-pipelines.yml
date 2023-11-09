@@ -1,20 +1,18 @@
-image: node:16 # Use a Node.js version supported by nvm
+image: node:14
 
 pipelines:
-  branches:
-    production: # Change 'production' to your target branch name
-      - step:
-          name: Deploy to Remote Server
-          script:
-            # Add SSH private key
-            - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-            - chmod 600 ~/.ssh/id_rsa
-
-            # Add the remote server to known hosts
-            - ssh-keyscan -H 164.92.88.138 >> ~/.ssh/known_hosts
-
-            # Deploy the entire project directory to the remote server
-            - scp -r ./* root@164.92.88.138:/var/www/Sable/dashboard
-
-            # Run npm run build after deploying
-            - ssh root@164.92.88.138 "cd /var/www/Sable/dashboard && nvm use v14.21.3 && npm install && npm run build"
+  default:
+    - step:
+        name: Build and Deploy
+        caches:
+          - node
+        script:
+          - nvm use v14.21.3
+          - npm install
+          - npm run build
+          - pipe: atlassian/scp-deploy:1.1.0
+            variables:
+              USER: 'root'
+              SERVER: '164.92.88.138'
+              REMOTE_PATH: '/var/www/Sable/dashboard/'
+              LOCAL_PATH: 'dist/'
