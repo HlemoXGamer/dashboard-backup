@@ -6,12 +6,6 @@ pipelines:
       - step:
           name: Deploy to Remote Server
           script:
-            # Use the desired Node.js version with nvm
-            - nvm use v14.21.3
-
-            # Install project dependencies
-            - npm install
-
             # Add SSH private key
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
             - chmod 600 ~/.ssh/id_rsa
