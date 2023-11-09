@@ -1,0 +1,26 @@
+image: node:16 # Use a Node.js version supported by nvm
+
+pipelines:
+  branches:
+    production: # Change 'production' to your target branch name
+      - step:
+          name: Deploy to Remote Server
+          script:
+            # Use the desired Node.js version with nvm
+            - nvm use v14.21.3
+
+            # Install project dependencies
+            - npm install
+
+            # Add SSH private key
+            - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+            - chmod 600 ~/.ssh/id_rsa
+
+            # Add the remote server to known hosts
+            - ssh-keyscan -H 164.92.88.138 >> ~/.ssh/known_hosts
+
+            # Deploy the entire project directory to the remote server
+            - scp -r ./* $SSH_USER@164.92.88.138:/path/to/remote/directory
+
+            # Run npm run build after deploying
+            - ssh $SSH_USER@164.92.88.138 "cd /var/www/Sable/dashboard && nvm use v14.21.3 && npm install && npm run build"
