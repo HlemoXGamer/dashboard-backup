@@ -7,7 +7,7 @@ pipelines:
         caches:
           - node
         script:
-          - nvm use v14.21.3
+          # - nvm use v14.21.3
           - npm install
           - npm run build
           - pipe: atlassian/scp-deploy:1.1.0
