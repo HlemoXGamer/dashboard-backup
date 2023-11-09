@@ -14,7 +14,7 @@ pipelines:
             - ssh-keyscan -H 164.92.88.138 >> ~/.ssh/known_hosts
 
             # Deploy the entire project directory to the remote server
-            - scp -r ./* $SSH_USER@164.92.88.138:/path/to/remote/directory
+            - scp -r ./* $SSH_USER@164.92.88.138:/var/www/Sable/dashboard
 
             # Run npm run build after deploying
             - ssh $SSH_USER@164.92.88.138 "cd /var/www/Sable/dashboard && nvm use v14.21.3 && npm install && npm run build"
