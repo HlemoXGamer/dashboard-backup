@@ -3,8 +3,8 @@ import axios from "axios";
 const axiosIns = axios.create({
   // You can add your headers here
   // ================================
-  // baseURL: "https://beta-be.sablesweets.com/api",
-  baseURL: "https://sable-be-new.mohamedradwan.me/api",
+  baseURL: "https://beta-be.sablesweets.com/api",
+  // baseURL: "https://sable-be-new.mohamedradwan.me/api",
   // timeout: 2000,
   // headers: {'X-Custom-Header': 'foobar'}
 });
