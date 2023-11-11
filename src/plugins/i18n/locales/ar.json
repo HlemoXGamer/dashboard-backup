@@ -1,4 +1,9 @@
 {
+  "Select Flavor": "اختر طعم",
+  "Select Extra": "اختر إضافة",
+  "Is Pre": "مسبق الطلب",
+  "extra_quantity": "كميه الإضافات",
+  "Extra And Flavors": "الإضافات الأطعمه",
   "Select All": "تحديد الكل",
   "Unselect All": "إلغاء تحديد الكل",
   "Untrackable Data": "بيانات غير كافيه",
@@ -311,7 +316,7 @@
   "Chat": "دردشة",
   "Invoice": "فاتورة",
   "Preview": "معاينة",
-  "Add": "يضيف",
+  "Add": "أضف",
   "User": "المستعمل",
   "View": "رأي",
   "Login v1": "تسجيل الدخول v1",

@@ -1,1 +1,0 @@
-import{bb as a,ba as e}from"./index-d6ee0790.js";let{get:t,show:o,update:s,create:f,remove:u}=a("/extra-flavor");function v(){return e.get("/extra-flavor?type=flavor")}function c(){return e.get("/extra-flavor?type=extra")}export{c as a,t as b,f as c,v as g,u as r,o as s,s as u};

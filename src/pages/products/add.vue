@@ -12,7 +12,7 @@ import { create as addMarkterProduct } from "@/apis/markter/products";
 
 import router from "@/router";
 import { toBase64 } from "@/utils/files";
-import { numericValidator, requiredValidator } from "@validators";
+import { numericValidator, requiredValidator, requiredIfValidator } from "@validators";
 import { useToast } from "vue-toastification";
 const images = ref([]);
 const imagesArray = ref([]);
@@ -177,14 +177,14 @@ onMounted(() => {
                 prepend-inner-icon="tabler-package"
                 v-model="form.name_en"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 mr-1"
+                class="flex-grow-1 me-1"
                 label="Name"
               ></AppTextField>
               <AppTextField
                 append-inner-icon="tabler-package"
                 v-model="form.name_ar"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 ml-1 text-right"
+                class="flex-grow-1 ms-1 text-right"
                 dir="rtl"
                 label="الاسم"
               ></AppTextField>
@@ -193,13 +193,13 @@ onMounted(() => {
               <AppTextarea
                 v-model="form.description_en"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 mr-1"
+                class="flex-grow-1 me-1"
                 label="Description"
               ></AppTextarea>
               <AppTextarea
                 v-model="form.description_ar"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 ml-1 text-right"
+                class="flex-grow-1 ms-1 text-right"
                 dir="rtl"
                 label="الوصف"
               ></AppTextarea>
@@ -209,7 +209,7 @@ onMounted(() => {
                   prepend-inner-icon="tabler-coins"
                   v-model="form.price"
                   :rules="[requiredValidator, numericValidator]"
-                  class="flex-grow-1 mr-1"
+                  class="flex-grow-1 me-1"
                   :label="$t('Product Price')"
                 ></AppTextField>
                 <VCombobox
@@ -221,7 +221,7 @@ onMounted(() => {
                   item-title="name_en"
                   :rules="[requiredValidator]"
                   v-model="form.categories"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ms-1 mt-6"
                   :label="$t('Select Category')"
                 ></VCombobox>
               </VRow>
@@ -230,14 +230,14 @@ onMounted(() => {
                   prepend-inner-icon="tabler-dna-2"
                   v-model="form.code"
                   :rules="[requiredValidator]"
-                  class="flex-grow-1 mr-1"
+                  class="flex-grow-1 me-1"
                   :label="$t('Product Code')"
                 ></AppTextField>
                 <AppTextField
                   prepend-inner-icon="tabler-clock"
                   v-model="form.prep_time"
                   :rules="[requiredValidator]"
-                  class="flex-grow-1 ml-1"
+                  class="flex-grow-1 ms-1"
                   :label="$t('Preparation Time')"
                 ></AppTextField>
               </VRow>
@@ -250,24 +250,25 @@ onMounted(() => {
                   item-value="id"
                   item-title="name"
                   v-model="form.extra"
-                  class="flex-grow-1 ml-1 mt-3"
+                  class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Extra')"
                 ></VCombobox>
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   :return-object="false"
                   :items="flavors"
+                  multiple
                   item-value="id"
                   item-title="name"
                   v-model="form.flavor"
-                  class="flex-grow-1 ml-1 mt-3"
+                  class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
                 <AppTextField
-                  prepend-inner-icon="tabler-dna-2"
+                  prepend-inner-icon="tabler-number"
                   v-model="form.extra_quantity"
-                  :rules="[requiredValidator]"
-                  class="flex-grow-1 ml-1 mt-3"
+                  :rules="[requiredIfValidator(form.extra_quantity, form.is_pre === 1)]"
+                  class="flex-grow-1 ms-1 mt-3"
                   :placeholder="$t('extra_quantity')"
                 ></AppTextField>
               </VRow>
