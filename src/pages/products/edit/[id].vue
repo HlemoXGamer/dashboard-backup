@@ -115,6 +115,12 @@ const _showProduct = async () => {
       form.value.categories = res.data.data.categories.map(
         (category) => category.id,
       );
+      form.value.extras = res.data.data.extras.map(
+        (extra) => extra.id,
+      );
+      form.value.flavors = res.data.data.flavors.map(
+        (flavor) => flavor.id,
+      );
       imagesArray.value = form.value.images;
     })
     : await showMarkterProduct(productId).then((res) => {

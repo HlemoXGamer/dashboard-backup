@@ -2,10 +2,13 @@ import { isEmpty, isEmptyArray, isNullOrUndefined } from "./index";
 
 // 👉 Required If Validator
 export const requiredIfValidator = (value, target) => {
-  if (target == true && (isNullOrUndefined(value) || isEmptyArray(value) || value === false))
+  if(target == true){
+    if ((isNullOrUndefined(value) || isEmptyArray(value) || value === false))
     return "This field is required";
 
-  return !!String(value).trim().length || "This field is required";
+    return !!String(value).trim().length || "This field is required";
+  }
+  return true;
 };
 
 // 👉 Required Validator
