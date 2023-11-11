@@ -1,0 +1,1 @@
+import{bc as e}from"./index-b025a402.js";let{get:t,show:o,update:a,create:s,remove:p}=e("/operation/deliverymen"),{get:c,show:m,update:$,create:d,remove:g}=e("/operation/branches");export{c as a,t as g};

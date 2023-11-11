@@ -1,1 +1,0 @@
-import{bc as r,bb as e}from"./index-cfc47404.js";let{get:t,show:o,update:s,create:c,remove:f}=r("/extra-flavor");function u(){return e.get("/extra-flavor?type=flavor")}function v(){return e.get("/extra-flavor?type=extra")}export{v as a,t as b,c,u as g,f as r,o as s,s as u};
