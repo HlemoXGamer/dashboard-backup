@@ -82,9 +82,7 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
             </VRow>
 
             <VRow v-if="discountRate">
-              <VDivider
-                :color="$vuetify.theme.current.dark ? '#B3BFFFFF' : 'primary'"
-              ></VDivider>
+              <VDivider :color="$vuetify.theme.current.dark ? '#B3BFFFFF' : 'primary'"></VDivider>
             </VRow>
 
             <VRow align="center" justify="space-between" class="mt-5">
@@ -92,10 +90,10 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
               <p class="mb-2">{{ deliveryCost }} KWD</p>
             </VRow>
 
-            <VRow align="center" justify="space-between" class="mt-5">
+            <!-- <VRow align="center" justify="space-between" class="mt-5">
               <p class="mb-2">{{ $t('Extra Cost') }}</p>
               <p class="mb-2">{{ extraCost }} KWD</p>
-            </VRow>
+            </VRow> -->
 
             <VRow>
               <VDivider
@@ -105,7 +103,8 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
 
             <VRow align="center" justify="space-between" class="mt-5">
               <p class="mb-2">{{ $t('Total') }}</p>
-              <p class="mb-2">{{ total + extraCost }} KWD</p>
+              <p class="mb-2">{{ total }} KWD</p>
+              <!-- <p class="mb-2">{{ total + extraCost }} KWD</p> -->
             </VRow>
 
             <VRow v-if="newtotal">
@@ -113,12 +112,7 @@ const discounts = { "fixed" : "KWD", "percentage": "%" };
                 :color="$vuetify.theme.current.dark ? '#B3BFFFFF' : 'primary'"
               ></VDivider>
             </VRow>
-            <VRow
-              v-if="newtotal"
-              align="center"
-              justify="space-between"
-              class="mt-5"
-            >
+            <VRow v-if="newtotal" align="center" justify="space-between" class="mt-5">
               <p class="mb-0">{{ $t('New Total') }}</p>
               <p class="mb-0">{{ Number(newtotal).toFixed(2) }} KWD</p>
             </VRow>
