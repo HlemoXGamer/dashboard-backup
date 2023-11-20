@@ -37,8 +37,8 @@ const form = ref({
   prep_time: "",
   price: "",
   status: 0,
-  extra: [],
-  flavor: [],
+  extras: [],
+  flavors: [],
   extra_quantity:1,
   is_pre: 0,
 });
@@ -249,7 +249,7 @@ onMounted(() => {
                   :items="extras"
                   item-value="id"
                   item-title="name"
-                  v-model="form.extra"
+                  v-model="form.extras"
                   class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Extra')"
                 ></VCombobox>
