@@ -33,8 +33,8 @@ const errors = ref({
 });
 
 const refVForm = ref();
-const email = ref("admin@admin.com");
-const password = ref("e570e87541abce2q");
+const email = ref("");
+const password = ref("");
 
 const login = async () => {
   loading.value = true;
@@ -118,12 +118,8 @@ const onSubmit = () => {
                   v-model="password"
                   :label="$t('Password')"
                   :rules="[requiredValidator]"
-                  :type="isPasswordVisible ? 'text' : 'password'"
+                  type="password"
                   :error-messages="errors.password"
-                  :append-inner-icon="
-                    isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
-                  "
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 />
 
                 <VBtn :loading="loading" block type="submit" class="mt-5">

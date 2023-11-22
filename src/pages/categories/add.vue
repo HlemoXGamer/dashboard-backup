@@ -33,13 +33,13 @@ const form = ref({
 });
 const selectedProducts = ref([]);
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
-const binaryImages = ref([]);
+const binaryImage = ref([]);
 
 const getImage = async (file) => {
   if (file instanceof File) {
     let image = await toBase64(file);
-    form.value.image = image;
-    binaryImages.value.push(file);
+    form.value.image = file;
+    binaryImage.value = image;
   }
 };
 
@@ -75,9 +75,7 @@ const _createCategory = async () => {
         formData.append("name_ar", form.value.name_ar);
         formData.append("is_active", form.value.is_active);
         formData.append("products", selectedProducts.value);
-        binaryImages.value.forEach((image, index) => {
-          formData.append(`image`, image);
-        });
+        formData.append(`image`, form.value.image);
         if(userRole == "admin"){
           await createAdminCategory(formData);
         }else if(userRole == "markter"){
@@ -96,6 +94,7 @@ const _createCategory = async () => {
 
 const deleteImage = (image) => {
   form.value.image = "";
+  binaryImage.value = "";
 };
 
 onMounted(() => {
@@ -200,7 +199,7 @@ onMounted(() => {
                 />
                 <VImg
                   prepend-icon="tabler-camera"
-                  :src="form.image"
+                  :src="binaryImage"
                   width="90px"
                   style="height: 90px"
                   cover

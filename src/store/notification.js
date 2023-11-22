@@ -48,8 +48,9 @@ export const useNotificationStore = defineStore("notifications", {
           });
           if(typeof data !== "undefined" && data.type == "restaurant"){
             if(notification_data.o_status == "paid"){
-              sound.stop()
-              sound.play()
+              sound.stop();
+              sound.play();
+              sound.loop(true);
             }
             if(notification_data.o_status == "cancelled"){
               this.getNotifications("restaurant", true)
@@ -67,6 +68,12 @@ export const useNotificationStore = defineStore("notifications", {
     getNotifications(payload, noCountUpdate = false) {
       getUserNotifications(payload).then(({ data }) => {
         this.SET_NOTIFICATION(data.data);
+        const userData = JSON.parse(window.localStorage.getItem("userData"));
+        if(typeof userData !== "undefined" && userData.type == "restaurant" && this.$state.items.filter(notification => notification.o_status == 'paid').length > 0){
+          sound.stop();
+          sound.play();
+          sound.loop(true);
+        }
         if(noCountUpdate === false){
           this.SET_TOTAL(
             data.data.filter((item) => item.is_active === 1)?.length || 0,

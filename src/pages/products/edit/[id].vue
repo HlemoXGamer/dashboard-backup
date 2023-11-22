@@ -43,6 +43,9 @@ const form = ref({
   name_en: "",
   prep_time: "",
   price: "",
+  // extra: '',
+  // flavor: '',
+  // is_pre: 0,
 });
 
 const binaryImages = ref([]);
@@ -78,6 +81,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
+          // extra,
+          // flavor,
+          // is_pre
         } = res.data.data;
 
         form.value = {
@@ -95,6 +101,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
+          // extra,
+          // flavor,
+          // is_pre
         };
         form.value.categories = res.data.data.categories.map(
           (category) => category.id,
@@ -118,6 +127,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
+          // extra,
+          // flavor,
+          // is_pre
         } = res.data.data;
 
         form.value = {
@@ -136,6 +148,9 @@ const _showProduct = async () => {
           name_en,
           prep_time,
           price,
+          // extra,
+          // flavor,
+          // is_pre
         };
 
         imagesArray.value = form.value.images;
@@ -190,6 +205,9 @@ const _updateProduct = async () => {
       formData.append("name_en", form.value.name_en);
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
+      // formData.append("extra", form.value.extra);
+      // formData.append("flavor", form.value.flavor);
+      // formData.append("is_pre", form.value.is_pre);
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
       });
@@ -322,6 +340,40 @@ onMounted(() => {
               :label="$t('Preparation Time')"
             ></AppTextField>
           </VRow>
+          <!-- <VRow v-if="userRole == 'admin'" class="mt-2" justify="space-between" align="center" style="gap: 5px">
+                <VCombobox
+                  prepend-inner-icon="tabler-package"
+                  multiple
+                  :return-object="false"
+                  :items="[
+                    {
+                      id: 0,
+                      name:'test',
+                    }
+                  ]"
+                  item-value="id"
+                  item-title="name"
+                  v-model="form.extra"
+                  class="flex-grow-1 ml-1 mt-6"
+                  :label="$t('Select Extra')"
+                ></VCombobox>
+                <VCombobox
+                  prepend-inner-icon="tabler-package"
+                  multiple
+                  :return-object="false"
+                  :items="[
+                    {
+                      id: 0,
+                      name:'test',
+                    }
+                  ]"
+                  item-value="id"
+                  item-title="name"
+                  v-model="form.flavor"
+                  class="flex-grow-1 ml-1 mt-6"
+                  :label="$t('Select Flavor')"
+                ></VCombobox>
+              </VRow> -->
         </VCol>
       </VCol>
       <VCol
@@ -397,6 +449,13 @@ onMounted(() => {
             :true-value="1"
             :label="$t('Need Note')"
           />
+          <!-- <VSwitch
+            v-model="form.is_pre"
+            :inset="false"
+            :false-value="0"
+            :true-value="1"
+            :label="$t('Is Pre')"
+          /> -->
         </VCol>
         <VRow class="px-5 mt-2">
           <VBtn color="primary" :loading="loading" type="submit" block

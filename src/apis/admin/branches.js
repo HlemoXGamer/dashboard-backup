@@ -9,3 +9,7 @@ export function getServiceCost() {
 export function setServiceCost(data) {
   return service.post("/branch_service", data);
 }
+
+export function getBranchesLog() {
+  return service.get('/product-history')
+}

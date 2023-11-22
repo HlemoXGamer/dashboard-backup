@@ -18,7 +18,6 @@ import { useI18n } from "vue-i18n"
 const $useI18n = useI18n()
 const t = $useI18n.t;
 const toast = useToast();
-
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const deliveries = ref([]);
 const deliveryMen = ref([]);
@@ -663,8 +662,7 @@ onMounted(() => {
             class="mt-lg-0 mt-md-0 mt-sm-0 mt-3 ms-3"
             :loading="loading"
             @click="exportExcel"
-            ><VIcon start icon="tabler-upload" />{{ $t("Export Excel") }}</VBtn -->
-          >
+            ><VIcon start icon="tabler-upload" />{{ $t("Export Excel") }}</VBtn> -->
         </VRow>
       </VRow>
       <VRow
@@ -807,17 +805,19 @@ onMounted(() => {
           class="mt-lg-0 mt-md-0 mt-sm-0 mt-3 ms-0"
           :loading="loading"
           @click="exportExcel"
-          ><VIcon start icon="tabler-upload" />{{ $t('Export Excel') }}</VBtn -->
-        >
+          ><VIcon start icon="tabler-upload" />{{ $t('Export Excel') }}</VBtn> -->
       </VRow>
       <VRow
         v-if="orders && userRole == 'restaurant'"
         id="order-list"
         class="px-5 py-0 mx-0 my-0"
       >
-        <div class="me-3 d-flex gap-3">
+      <VCol cols="12" class="pe-0 px-0 py-0 v-col-sm-12 v-col-md-10 v-col-lg-10 mx-0 my-0">
+
+        <VRow no-gutters>
+          <div class="me-3 d-flex gap-3">
           <!-- 👉 Search  -->
-          <div class="order-list-filter">
+          <div class="order-list-filter my-1">
             <AppTextField
               prepend-inner-icon="tabler-package"
               v-model="form.searchTerm"
@@ -826,7 +826,7 @@ onMounted(() => {
             />
           </div>
           <!-- 👉 Select Delivery -->
-          <div class="order-list-filter">
+          <div class="order-list-filter my-1">
             <AppSelect
               prepend-inner-icon="tabler-truck-delivery"
               v-model="form.selectedDelivery"
@@ -844,22 +844,35 @@ onMounted(() => {
             prepend-inner-icon="tabler-calendar"
             :placeholder="t('From')"
             style="width: 150px"
+            class="my-1"
           />
           <AppDateTimePicker
             v-model="form.selectedDateTo"
             prepend-inner-icon="tabler-calendar"
             :placeholder="t('To')"
             style="width: 150px"
+            class="my-1"
           />
         </div>
+        <VRow no-gutters class="my-1">
+        <AppTextField
+          style="width: 250px"
+          prepend-inner-icon="tabler-number"
+          v-model="form.selectedOrder"
+          :placeholder="t('Search by Order Number')"
+          density="compact"
+        />
+      </VRow>
+        </VRow>
+        </VCol>
+        <VCol cols="12" class="px-0 py-0 v-col-sm-12 v-col-md-2 v-col-lg-2 mx-0 my-0">
 
-        <VSpacer />
-
-        <div class="d-flex align-center">
+        <div class="d-flex align-center my-0 flex-column">
           <VBtn
-            class="me-2 mt-sm-3 mt-lg-0"
+            class="me-0"
             variant="tonal"
             color="warning"
+            block
             prepend-icon="tabler-x"
             :disabled="gettingOrders || !isFiltered"
             @click="clearFilters()"
@@ -867,12 +880,13 @@ onMounted(() => {
             {{ $t('Reset') }}
           </VBtn>
           <VBtn 
+          class="mt-2"
+          block
           :disabled="!filters.length || gettingOrders"
-          @click="search(getFilters().filters)"
-          class="mt-sm-3 mt-lg-0"> {{ $t('Search') }} </VBtn>
+          @click="search(getFilters().filters)"> {{ $t('Search') }} </VBtn>
         </div>
+        </VCol>
       </VRow>
-
       <OrdersTable
         v-if="userRole == 'admin'"
         :gettingOrders="gettingOrders"

@@ -1,6 +1,7 @@
 <script setup>
 import { useNotificationStore } from "@/store/notification";
 import { useThemeConfig } from "@core/composable/useThemeConfig";
+import { Howler } from "howler";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -23,6 +24,9 @@ const HandleOrderDetails = (order) => {
   const index = items.value.indexOf(order);
   if (index != -1) {
     items.value.splice(index, 1);
+  }
+  if(items.value.length == 0 || items.value.length == "undefined"){
+    Howler.stop();
   }
   router.push(`./orders/${order.order_id}`);
 };

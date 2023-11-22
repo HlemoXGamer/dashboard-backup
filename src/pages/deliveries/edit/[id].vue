@@ -1,10 +1,18 @@
 <script setup>
-import { get as getBranches } from "@/apis/admin/branches";
 import { get as getDays } from "@/apis/admin/days";
+
+import { get as getAdminBranches } from "@/apis/admin/branches";
 import {
-  show as showDelivery,
-  update as updateDelivery,
+  show as showAdminDelivery,
+  update as updateAdminDelivery,
 } from "@/apis/admin/deliveries";
+
+import { get as getLogisticBranches } from "@/apis/logistics/branches";
+import {
+  show as showLogisticDelivery,
+  update as updateLogisticDelivery,
+} from "@/apis/logistics/deliveries";
+
 import {
   emailValidator,
   integerValidator,
@@ -40,33 +48,66 @@ const form = ref({
 });
 
 const _showDelivery = async () => {
-  await showDelivery(deliveryId).then((res) => {
-    let {
-      start,
-      end,
-      name,
-      phone,
-      email,
-      code,
-      working_hour,
-      working_days,
-      branch_id,
-      is_active,
-    } = res.data.data;
+  if ( userRole == 'admin' )
+  {
+    await showAdminDelivery(deliveryId).then((res) => {
+      let {
+        start,
+        end,
+        name,
+        phone,
+        email,
+        code,
+        working_hour,
+        working_days,
+        branch_id,
+        is_active,
+      } = res.data.data;
 
-    form.value = {
-      start,
-      end,
-      name,
-      phone,
-      email,
-      code,
-      working_hour,
-      working_days,
-      branch_id,
-      is_active,
-    };
-  });
+      form.value = {
+        start,
+        end,
+        name,
+        phone,
+        email,
+        code,
+        working_hour,
+        working_days,
+        branch_id,
+        is_active,
+      };
+    });
+  }
+  else if ( userRole == 'logistic' )
+  {
+    await showLogisticDelivery(deliveryId).then((res) => {
+      let {
+        start,
+        end,
+        name,
+        phone,
+        email,
+        code,
+        working_hour,
+        working_days,
+        branch_id,
+        is_active,
+      } = res.data.data;
+
+      form.value = {
+        start,
+        end,
+        name,
+        phone,
+        email,
+        code,
+        working_hour,
+        working_days,
+        branch_id,
+        is_active,
+      };
+    });
+  }
 };
 
 const _updateDelivery = async () => {
@@ -88,7 +129,7 @@ const _updateDelivery = async () => {
       )[0].id;
       form.value.branch_id = branch_id;
       try {
-        const { data } = await updateDelivery(deliveryId, form.value);
+        const { data } = userRole == 'admin' ? await updateAdminDelivery(deliveryId, form.value) : await updateLogisticDelivery(deliveryId, form.value)
         toast.success("Delivery man updated successfully");
         loading.value = false;
       } catch (err) {
@@ -100,12 +141,21 @@ const _updateDelivery = async () => {
 };
 
 const _getBranches = async () => {
-  await getBranches().then(({ data, meta }) => {
-    branches.value = data.data;
-    branch_name.value = branches.value.filter(
-      (branch) => branch.id == form.value.branch_id,
-    )[0].name_en;
-  });
+  if (userRole == "admin") {
+    await getAdminBranches().then(({ data, meta }) => {
+      branches.value = data.data;
+      branch_name.value = branches.value.filter(
+        (branch) => branch.id == form.value.branch_id,
+      )[0].name_en;
+    });
+  } else if (userRole == "logistic") {
+    await getLogisticBranches().then(({ data, meta }) => {
+      branches.value = data.data;
+      branch_name.value = branches.value.filter(
+        (branch) => branch.id == form.value.branch_id,
+      )[0].name_en;
+    });
+  }
 };
 
 const _getDays = async () => {
@@ -117,7 +167,7 @@ const _getDays = async () => {
 };
 
 onMounted(() => {
-  if (userRole == "admin") {
+  if (userRole == "admin" || userRole == "logistic") {
     _showDelivery();
     _getDays();
     _getBranches();
@@ -132,7 +182,7 @@ onMounted(() => {
           class="px-5 rounded"
           style="background-color: rgb(var(--v-theme-surface))"
         >
-          <p class="text-h4 pt-3 pb-2">{{ $t('Update Delivery') }}</p>
+          <p class="text-h4 pt-3 pb-2">{{ $t("Update Delivery") }}</p>
           <VCol>
             <VRow justify="space-between" align="start">
               <AppTextField
@@ -163,7 +213,6 @@ onMounted(() => {
               <AppTextField
                 style="width: 100%"
                 class="ps-3 w-50"
-                :rules="[betweenValidator(form.password?.length, 4, 8)]"
                 v-model="form.password"
                 :label="$t('Password')"
               >
@@ -222,7 +271,7 @@ onMounted(() => {
                 :loading="loading"
                 type="submit"
               >
-                <VIcon start icon="tabler-check" />{{ $t('Update') }}
+                <VIcon start icon="tabler-check" />{{ $t("Update") }}
               </VBtn>
               <VSwitch
                 class="ml-7"
@@ -249,5 +298,5 @@ onMounted(() => {
 <route lang="yaml">
 meta:
   requiresAuth: true
-  roles: ["admin"]
+  roles: ["admin", "logistic"]
 </route>

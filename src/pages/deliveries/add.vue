@@ -1,7 +1,11 @@
 <script setup>
-import { get as getBranches } from "@/apis/admin/branches";
+import { get as getAdminBranches } from "@/apis/admin/branches";
 import { get as getDays } from "@/apis/admin/days";
-import { create as addDelivery } from "@/apis/admin/deliveries";
+import { create as addAdminDelivery } from "@/apis/admin/deliveries";
+
+import { get as getLogisticBranches } from "@/apis/logistics/branches";
+// import { get as getLogisticDays } from "@/apis/logistics/days";
+import { create as addLogisticDelivery } from "@/apis/logistics/deliveries";
 import {
   emailValidator,
   integerValidator,
@@ -11,19 +15,29 @@ import {
 } from "@validators";
 import { useToast } from "vue-toastification";
 import { VForm } from "vuetify/components/VForm";
+const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
+import router from "@/router";
 const branches = ref([]);
 const refVForm = ref();
 
 const _getBranches = () => {
-  getBranches().then(({ data, meta }) => {
-    branches.value = data.data;
-  });
+  if (userRole == 'admin')
+  {
+    getAdminBranches().then(({ data, meta }) => {
+      branches.value = data.data;
+    });
+  }
+  else if (userRole == 'logistic')
+  {
+    getLogisticBranches().then(({ data, meta }) => {
+      branches.value = data.data;
+    });
+  }
 };
 
 const toast = useToast();
 const loading = ref(false);
 const days = ref([]);
-const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const form = ref({
   start: "",
   end: "",
@@ -58,9 +72,17 @@ const _addDelivery = async () => {
       form.value.branch_id = branch_id;
 
       try {
-        await addDelivery(form.value);
+        if (userRole == 'admin')
+        {
+          await addAdminDelivery(form.value);
+        }
+        else if (userRole == 'logistic')
+        {
+          await addLogisticDelivery(form.value);
+        }
         toast.success("Delivery man added successfully");
         loading.value = false;
+        router.back()
       } catch (err) {
         toast.error(err.response.data.message);
         loading.value = false;
@@ -76,7 +98,7 @@ const _getDays = () => {
 };
 
 onMounted(() => {
-  if (userRole == "admin") {
+  if (userRole == "admin" || userRole == 'logistic') {
     _getDays();
     _getBranches();
   }
@@ -204,7 +226,7 @@ onMounted(() => {
 <route lang="yaml">
 meta:
   requiresAuth: true
-  roles: ["admin"]
+  roles: ["admin", "logistic"]
 </route>
 
 <style lang="scss" scoped>

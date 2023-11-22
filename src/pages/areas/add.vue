@@ -8,6 +8,7 @@ const loading = ref(false);
 const form = ref({ name_en: "", name_ar: "", city_id: 1 });
 const refVForm = ref();
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
+import router from "@/router";
 
 const _addArea = async () => {
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
@@ -17,6 +18,7 @@ const _addArea = async () => {
         await create(form.value);
         loading.value = false;
         toast.success("Area Added successfully");
+        router.back();
       } catch (err) {
         toast.error(err.response.data.message);
         loading.value = false;

@@ -37,13 +37,13 @@ const form = ref({
 });
 
 const selectedProducts = ref([]);
-const binaryImages = ref([]);
+const binaryImage = ref([]);
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const getImage = async (file) => {
   if (file instanceof File) {
     let image = await toBase64(file);
-    form.value.image = image;
-    binaryImages.value.push(file);
+    form.value.image = file;
+    binaryImage.value = image;
   }
 };
 
@@ -118,6 +118,7 @@ const _showCategory = async () => {
       form.value.name_ar = data.data.name_ar;
       form.value.is_active = data.data.is_active;
       form.value.image = data.data.image;
+      binaryImage.value = data.data.image;
       form.value.products = data.data.products;
     }else if(userRole == "markter"){
       data = await getMarkterCategory(categoryId).then(({data}) => { return data });
@@ -125,6 +126,7 @@ const _showCategory = async () => {
       form.value.name_ar = data.data.name_ar;
       form.value.is_active = data.data.is_active;
       form.value.image = data.data.image;
+      binaryImage.value = data.data.image;
       form.value.products = data.data.products;
     }
     selectedProducts.value = data.data.products.map((item) => item.id);
@@ -135,6 +137,7 @@ const _showCategory = async () => {
 
 const deleteImage = (image) => {
   form.value.image = "";
+  binaryImage.value = "";
 };
 
 onMounted(() => {
@@ -243,7 +246,7 @@ onMounted(() => {
                 />
                 <VImg
                   prepend-icon="tabler-camera"
-                  :src="form.image"
+                  :src="binaryImage"
                   width="90px"
                   style="height: 90px"
                   cover

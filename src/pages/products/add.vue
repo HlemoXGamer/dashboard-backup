@@ -3,8 +3,12 @@
 import { get as getAdminCategories } from "@/apis/admin/categories";
 import { create as addAdminProduct } from "@/apis/admin/products";
 
+import { getFlavor } from "@/apis/admin/extra-flavors";
+import { getExtra } from "@/apis/admin/extra-flavors";
+
 import { get as getMarkterCategories } from "@/apis/markter/categories";
 import { create as addMarkterProduct } from "@/apis/markter/products";
+
 
 import router from "@/router";
 import { toBase64 } from "@/utils/files";
@@ -15,6 +19,8 @@ const imagesArray = ref([]);
 const toast = useToast();
 const loading = ref(false);
 const categories = ref([]);
+const extras = ref([]);
+const flavors = ref([]);
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const form = ref({
   code: "",
@@ -31,6 +37,9 @@ const form = ref({
   prep_time: "",
   price: "",
   status: 0,
+  // extra: [],
+  // flavor: [],
+  // is_pre: 0,
 });
 const refVForm = ref();
 const binaryImages = ref([]);
@@ -51,6 +60,7 @@ const _addProduct = async () => {
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
     if (isValid) {
       loading.value = true;
+
       let formData = new FormData();
       formData.append("code", form.value.code);
       formData.append("categories", form.value.categories);
@@ -64,6 +74,9 @@ const _addProduct = async () => {
       formData.append("prep_time", form.value.prep_time);
       formData.append("price", form.value.price);
       formData.append("status", form.value.status);
+      // formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
+      // formData.append("is_pre", form.value.is_pre);
+
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
       });
@@ -95,6 +108,25 @@ const _getCategories = () => {
   }
 };
 
+const _getFlavors = () => {
+  if (userRole == 'admin')
+  {
+    getFlavor().then(({ data, meta }) => {
+    flavors.value = data.data;
+  });
+  }
+};
+
+
+const _getExtras = () => {
+  if (userRole == 'admin')
+  {
+    getExtra().then(({ data, meta }) => {
+    extras.value = data.data;
+  });
+  }
+};
+
 const deleteImage = async (image) => {
   const index = imagesArray.value.indexOf(
     imagesArray.value.filter((img) => img.url == image.url)[0],
@@ -115,7 +147,10 @@ const deleteImage = async (image) => {
 
 onMounted(() => {
   _getCategories();
+  _getFlavors();
+  _getExtras();
 });
+
 </script>
 <template>
   <VRow class="mt-4 px-4" justify="space-around">
@@ -200,6 +235,29 @@ onMounted(() => {
                   :label="$t('Preparation Time')"
                 ></AppTextField>
               </VRow>
+              <!-- <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
+                <VCombobox
+                  prepend-inner-icon="tabler-package"
+                  multiple
+                  :return-object="false"
+                  :items="exters"
+                  item-value="id"
+                  item-title="name"
+                  v-model="form.extra"
+                  class="flex-grow-1 ml-1 mt-6"
+                  :label="$t('Select Extra')"
+                ></VCombobox>
+                <VCombobox
+                  prepend-inner-icon="tabler-package"
+                  :return-object="false"
+                  :items="flavors"
+                  item-value="id"
+                  item-title="name"
+                  v-model="form.flavor"
+                  class="flex-grow-1 ml-1 mt-6"
+                  :label="$t('Select Flavor')"
+                ></VCombobox>
+              </VRow> -->
           </VCol>
         </VCol>
       </VCol>
@@ -276,6 +334,13 @@ onMounted(() => {
             :true-value="1"
             :label="$t('Need Note')"
           />
+          <!-- <VSwitch
+            v-model="form.is_pre"
+            :inset="false"
+            :false-value="0"
+            :true-value="1"
+            :label="$t('Is Pre')"
+          /> -->
         </VCol>
         <VRow class="px-5 mt-2">
           <VBtn color="primary" :loading="loading" type="submit" block

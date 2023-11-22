@@ -13,6 +13,7 @@ import {
 } from "@validators";
 import { useToast } from "vue-toastification";
 import { VForm } from "vuetify/components/VForm";
+import router from "@/router";
 
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const refVForm = ref();
@@ -49,6 +50,7 @@ const _addBranch = async () => {
         await addBranch(form.value);
         toast.success("Branch added successfully");
         loading.value = false;
+        router.back()
       } catch (err) {
         toast.error(err.response.data.message);
         loading.value = false;

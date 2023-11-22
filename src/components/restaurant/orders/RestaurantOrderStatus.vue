@@ -3,8 +3,8 @@ import { onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import axios from "@/plugins/axios";
 import { useRoute } from "vue-router";
-import { useI18n } from "vue-i18n"
-const $useI18n = useI18n()
+import { useI18n } from "vue-i18n";
+const $useI18n = useI18n();
 const t = $useI18n.t;
 
 const props = defineProps({
@@ -52,7 +52,7 @@ const UpdateOrderData = ref({
   est_time: null,
   status: null,
 });
-const branchTime = JSON.parse(localStorage.getItem("userData"))
+const branchTime = JSON.parse(localStorage.getItem("userData"));
 const start = ref(props.start);
 const end = ref(props.end);
 const dialog = ref(false),
@@ -121,19 +121,19 @@ const UpdateOrderDeliveryman = () => {
   axios
     .put("/restaurant-apis/assign/delivery", DeliverymanData.value)
     .then((response) => {
-      toast.success("Deliveryman Updated Successfully");
       filteredDeliveries.value = deliveries.value.filter(
         (delivery) => delivery.is_active === 1,
       );
+      toast.success("Deliveryman Updated Successfully");
     })
     .catch((error) => {
       toast.error(error.message);
     });
-  };
-  const isDeliveryDisabled = computed(() => {
-    return currentStatus.value !== 'ready_for_delivery';
-  });
-  
+};
+const isDeliveryDisabled = computed(() => {
+  return currentStatus.value !== "ready_for_delivery";
+});
+
 // Watch for changes in currentDelivery
 watch(currentDelivery, (newDelivery, oldDelivery) => {
   // Perform actions when currentDelivery changes
@@ -150,8 +150,7 @@ onMounted(() => {
   if (userRole == "restaurant") {
     FetchDeliveries();
     setTimeout(() => {
-      if (currentStatusIndex !== -1)
-      {
+      if (currentStatusIndex !== -1) {
         statuses.value[currentStatusIndex].itemDisabled = false;
         statuses.value[currentStatusIndex + 1].itemDisabled = false;
         statuses.value[4].itemDisabled = true;
@@ -166,13 +165,17 @@ onMounted(() => {
   <VDialog v-model="dialog" persistent class="v-dialog-sm">
     <!-- Dialog Content -->
     <VCard title="Delivery Time">
-      <VCardText> {{ $t('Are you sure that you want to change Status') }} </VCardText>
+      <VCardText>
+        {{ $t("Are you sure that you want to change Status") }}
+      </VCardText>
 
       <VCardText class="d-flex justify-end gap-3 flex-wrap">
         <VBtn color="secondary" variant="tonal" @click="dialog = false">
-          {{ $t('Cancel') }}
+          {{ $t("Cancel") }}
         </VBtn>
-        <VBtn @click="UpdateOrder" :loading="orderLoading"> {{ $t('Confirm') }} </VBtn>
+        <VBtn @click="UpdateOrder" :loading="orderLoading">
+          {{ $t("Confirm") }}
+        </VBtn>
       </VCardText>
     </VCard>
   </VDialog>
@@ -180,7 +183,7 @@ onMounted(() => {
     class="mt-6 px-5 rounded pb-8 w-100 mx-auto"
     style="background-color: rgb(var(--v-theme-surface))"
   >
-    <p class="text-h4 pt-3 mb-3">{{ $t('Status') }}</p>
+    <p class="text-h4 pt-3 mb-3">{{ $t("Status") }}</p>
     <VCol>
       <VRow justify="space-between" align="center">
         <VSelect
@@ -222,12 +225,13 @@ onMounted(() => {
           label="Delivery"
           style="width: 100%"
           variant="outlined"
+          @update:model-value="UpdateOrderDeliveryman"
         />
       </VRow>
       <VRow justify="space-between" align="center" class="mt-7">
         <!-- TASK: [SAB-563] Restaurant and Agent shouldn't have time -->
-          <!-- :disabled="currentStatusIndex > 3" -->
-          <AppDateTimePicker
+        <!-- :disabled="currentStatusIndex > 3" -->
+        <AppDateTimePicker
           disabled
           :key="timeKey"
           v-model="currentTime"
@@ -248,7 +252,7 @@ onMounted(() => {
           @click="UpdateOrder"
           :loading="orderLoading"
           :disabled="order.status == 'delivered' || order.status == 'paid'"
-          >{{ $t('Save') }}</VBtn
+          >{{ $t("Save") }}</VBtn
         >
       </VRow>
     </VCol>

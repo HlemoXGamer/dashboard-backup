@@ -315,8 +315,7 @@ onMounted(() => {
             :block="$vuetify.display.xs"
             class="mt-lg-0 mt-md-0 mt-sm-0 mt-3"
             @click="$router.push('my-orders/create/')"
-            ><VIcon start icon="tabler-plus" />{{ $t('Create Order') }}</VBtn
-          >
+            ><VIcon start icon="tabler-plus" />{{ $t('Create Order') }}</VBtn>
           <!-- <VBtn
             color="success"
             :block="$vuetify.display.xs"
