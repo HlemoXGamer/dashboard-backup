@@ -30,30 +30,26 @@ const headers = computed(() => [
 ]);
 
 const props = defineProps({
-  items: {
+  data: {
     type: Array,
     default: [],
   },
 });
+
+// onMounted(() => {
+//   console.log('Branches Log', props.items);
+// });
+// watch(() => props.items, (newVal) => {
+//   console.log('Updated Branches Log', newVal);
+// }, { deep: true });
 </script>
 
 <template>
   <VDataTable
-    :items="items"
+    :items="data"
     :headers="headers"
     :items-per-page="15"
     class="pb-5 mt-0"
     title="Branches Log"
-  >
-  <template #item.action="{item}">
-    <VChip
-        :color="resolveStatusVariant(item.raw.action).color"
-        :class="`text-${resolveStatusVariant(item.raw.action).color}`"
-        size="small"
-        class="font-weight-medium"
-      >
-        {{ resolveStatusVariant(item.raw.action).text }}
-      </VChip>
-  </template>
-  </VDataTable>
+  />
 </template>

@@ -36,6 +36,7 @@ const langIdentifier = computed(() => {
     return 'name_ar';
   }
 });
+
 </script>
 
 <template>
@@ -68,9 +69,16 @@ const langIdentifier = computed(() => {
               </p>
               <VRow justify="end" align="center">
                 <p class="text-h6 pb-0 mb-0 me-5 font-weight-bold">
-                  {{ product.quantity }} X {{ product.price }} =
-                  {{ Number(product.price * product.quantity).toFixed(2) }} KWD
-                </p>
+  {{ product.quantity }} X {{ product.price }} + 
+  {{
+    product.cart_extra_flavor.reduce((acc, flavor) => acc + Number(flavor.price), 0).toFixed(2)
+  }} KWD =
+  {{
+    (Number(product.price * product.quantity) +
+    product.cart_extra_flavor.reduce((acc, flavor) => acc + Number(flavor.price), 0)).toFixed(2)
+  }} KWD
+</p>
+
                 <VBtn v-if="product.has_note == 1 && product.cart_notes.length > 0" size="small" class="px-2 me-3"
                   @click="putNotes(product.cart_notes)">{{ $t('Check Notes') }}</VBtn>
                 <VChip size="large" color="primary" variant="flat" class="font-weight-bold justify-center align-center">{{

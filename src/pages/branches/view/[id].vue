@@ -63,6 +63,7 @@ const _showBranch = async () => {
       name_ar,
       phone_no,
       areas,
+      days,
       city_id,
       street_name,
       building_no,
@@ -73,7 +74,7 @@ const _showBranch = async () => {
       code,
       is_active,
     };
-    form.value.working_days = days.map((day) => day.id);
+    // form.value.working_days = days.map((day) => day);
     form.value.email = res.data.data.user.email;
 
     getAreas()
@@ -86,6 +87,7 @@ const _showBranch = async () => {
 const _getBranchesLog = () => {
   getBranchesLog(branchId).then(({data, meta}) => {
     branchesLog.value = data.data
+    console.log('BranchesLog', branchesLog.value);
   })
 }
 
@@ -122,7 +124,7 @@ onMounted(() => {
         style="background-color: rgb(var(--v-theme-surface))"
       >
         <p class="text-h4 pt-3 pb-2">{{ $t("Branches Log") }}</p>
-        <BranchesViewTable :items="branchesLog" />
+        <BranchesViewTable :data="branchesLog" />
       </VCol>
     </VCol>
   </VRow>

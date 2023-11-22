@@ -15,6 +15,7 @@ const _getCities = () => {
 };
 onMounted(() => {
   _getCities();
+  
 });
 </script>
 <template>
@@ -49,12 +50,20 @@ onMounted(() => {
       </VRow>
       <VRow class="px-2 mt-7">
         <VCol>
-          <AppTextField
+          <VCombobox
             readonly
-            :label="$t('Working Days')"
             class="mx-4 flex-grow-1"
-            v-model="data.working_days"
-          ></AppTextField>
+            v-model="data.days"
+            :label="$t('Working Days')"
+            :return-object="false"
+            :items="data.days"
+            multiple
+            style="width: 100%"
+            variant="outlined"
+            item-value="id"
+            item-title="name"
+          >
+          </VCombobox>
         </VCol>
         <VCol>
           <AppTextField
@@ -91,16 +100,20 @@ onMounted(() => {
           ></AppTextField>
         </VCol>
         <VCol>
-          <AppTextField
+          <VCombobox
             readonly
-            :label="$t('cities')"
-            :items="cities"
             class="mx-4 flex-grow-1"
-            v-model="data.city_id"
+            v-model="cities"
+            :label="$t('Cities')"
+            :return-object="false"
+            :items="cities"
+            multiple
+            style="width: 100%"
+            variant="outlined"
             item-value="id"
             item-title="name"
-            :return-object="false"
-          ></AppTextField>
+          >
+          </VCombobox>
         </VCol>
       </VRow>
       <VRow class="px-2 mt-7">
