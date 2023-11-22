@@ -366,7 +366,6 @@ const _updateTime = () => {
     endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
     if(form.value.delivery_date == "" || form.value.delivery_date == null) return;
     if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
-        console.log("wtf");  
         menuType = "menuType=pre-order";
         isPreValid.value = true;
         _getProducts(menuType);
@@ -391,7 +390,17 @@ const addDetails = () => {
 };
 
 const deleteProduct = (product) => {
-  total.value = total.value - product.price * product.quantity;
+  let extrasPrice = 0;
+  if(product.hasOwnProperty("extras")){
+    const item = form.value.products.find(item => item.product_id == product.id);
+    const itemProduct = products.value.find(item => item.id == product.id);
+    itemProduct.extras.forEach(extra => {
+      if(item.extra.includes(extra.id)){
+        extrasPrice += Number(extra.price);
+      }
+    })
+  }
+  total.value = total.value - extrasPrice - product.price * product.quantity;
   orderProducts.value.splice(orderProducts.value.indexOf(product), 1);
   form.value.products.splice(
     form.value.products.indexOf(
@@ -591,16 +600,6 @@ const deleteImage = (image) => {
   product.images.splice(product.images.indexOf(image), 1);
 };
 
-const addExtrasFlavors = () => {
-  let product = form.value.products.find(
-    (product) => product.product_id == currentProduct.value,
-  );
-
-  product.extra = form.value.extra;
-  product.flavor = form.value.flavor;
-
-  ExtraFlavorsDialog.value = false
-}
 
 const currentProductExtras = computed(() => {
   return products.value.find(product => product.id == currentProduct.value).extras;
@@ -721,31 +720,35 @@ onMounted(() => {
       <VCard title="Additional Options">
         <VCardText>
           <VRow v-if="currentProduct">
-                <VSelect
-                  prepend-inner-icon="tabler-building-store"
-                  placeholder="Flavor"
-                  :label="$t('Flavor')"
-                  v-model="form.flavor"
-                  :items="products.find(product => product.id == currentProduct).flavors"
-                  item-value="id"
-                  item-title="name"
-                  variant="outlined"
-                  :return-object="false"
-                  class="flex-grow-1 my-1 mx-2"
-                />
+            <VCol cols="6">
               <VSelect
-                prepend-inner-icon="tabler-package"
-                v-model="form.extra"
-                item-title="name"
-                :items="products.find(product => product.id == currentProduct).extras"
+                prepend-inner-icon="tabler-building-store"
+                placeholder="Flavor"
+                :label="$t('Flavor')"
+                v-model="form.flavor"
+                :items="products.find(product => product.id == currentProduct).flavors"
                 item-value="id"
+                item-title="name"
                 variant="outlined"
-                :label="$t('Extra')"
                 :return-object="false"
                 class="flex-grow-1 my-1 mx-2"
-                multiple
               />
-          </VRow>
+            </VCol>
+            <VCol cols="6">
+            <VSelect
+              prepend-inner-icon="tabler-package"
+              v-model="form.extra"
+              item-title="name"
+              :items="products.find(product => product.id == currentProduct).extras"
+              item-value="id"
+              variant="outlined"
+              :label="$t('Extra')"
+              :return-object="false"
+              class="flex-grow-1 my-1 mx-2"
+              multiple
+            />
+          </VCol>
+       </VRow>
         </VCardText>
 
         <VCardText class="d-flex justify-end gap-3 flex-wrap">

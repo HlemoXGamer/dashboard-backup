@@ -523,7 +523,17 @@ const addDetails = () => {
 };
 
 const deleteProduct = (product) => {
-  total.value = total.value - product.price * product.quantity;
+  let extrasPrice = 0;
+  if(product.hasOwnProperty("extras")){
+    const item = form.value.products.find(item => item.product_id == product.id);
+    const itemProduct = products.value.find(item => item.id == product.id);
+    itemProduct.extras.forEach(extra => {
+      if(item.extra.includes(extra.id)){
+        extrasPrice += Number(extra.price);
+      }
+    })
+  }
+  total.value = total.value - extrasPrice - product.price * product.quantity;
   orderProducts.value.splice(orderProducts.value.indexOf(product), 1);
   form.value.products.splice(
     form.value.products.indexOf(
@@ -767,6 +777,14 @@ const addExtrasFlavors = () => {
 
   product.extra = form.value.extra;
   product.flavor = form.value.flavor;
+  let extrasPrice = 0;
+  products.value.find(item => item.id == currentProduct.value).extras.forEach(extra => {
+    if(product.extra.includes(extra.id)){
+      extrasPrice += Number(extra.price) * Number(product.quantity);
+    }
+  })
+
+  total.value = total.value + extrasPrice;
 
   ExtraFlavorsDialog.value = false
 }
@@ -912,7 +930,8 @@ onMounted(() => {
       <VCard title="Additional Options">
         <VCardText>
           <VRow v-if="currentProduct">
-                <AppCombobox
+            <VCol cols="6">
+                <VCombobox
                   prepend-inner-icon="tabler-building-store"
                   placeholder="Flavor"
                   :label="$t('Flavor')"
@@ -924,6 +943,8 @@ onMounted(() => {
                   :return-object="false"
                   class="flex-grow-1 my-1 mx-2"
                 />
+                </VCol>
+                <VCol cols="6">
               <VSelect
                 prepend-inner-icon="tabler-package"
                 v-model="form.extra"
@@ -936,6 +957,7 @@ onMounted(() => {
                 class="flex-grow-1 my-1 mx-2"
                 multiple
               />
+              </VCol>
           </VRow>
         </VCardText>
 
