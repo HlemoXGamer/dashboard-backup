@@ -8,8 +8,8 @@ export function getProducts() {
   return service.get("/stats/product");
 }
 
-export function getOrderProducts() {
-  return service.get("/products/order_product");
+export function getOrderProducts(data) {
+  return service.get(`/products/order_product?${data}`);
 }
 
 export function getStatsProduct() {

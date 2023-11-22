@@ -144,17 +144,17 @@ const _getRestaurantBranches = () => {
   })
 }
 
-const _getProducts = () => {
+const _getProducts = (params) => {
   productsLoading.value = true;
-  getProducts().then(({ data, meta }) => {
+  getProducts(params).then(({ data, meta }) => {
     products.value = data.data;
     productsLoading.value = false;
   });
 };
 
-const _getRestaurantProducts = () => {
+const _getRestaurantProducts = (params) => {
   productsLoading.value = true;
-  getRestaurantProducts().then(({ data, meta }) => {
+  getRestaurantProducts(params).then(({ data, meta }) => {
     products.value = data.data;
     productsLoading.value = false;
   });
@@ -482,7 +482,22 @@ const _updateTime = () => {
   } else {
     isClosed.value = false;
     branchStart.value = branchStartBackup.value;
-  }
+
+    let menuType;
+    let currentDate = new Date();
+    let startTime = new Date(currentDate);
+    startTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
+    let endTime = new Date(currentDate);
+    endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
+    if((currentDate.getDate() !== currentDay.value) || (currentDate >= startTime && currentDate <= endTime)){
+        menuType = "menuType=pre-order";
+        if (userRole == "admin") {
+          _getProducts(menuType);
+        } else if (userRole == "restaurant") {
+          _getRestaurantProducts(menuType);
+        }
+      }
+    }
 
   timeKey.value += 1;
   form.value.delivery_time = null;
@@ -561,8 +576,8 @@ const _createOrder = async () => {
   formData.append("address_street_name", form.value.address_street_name);
   formData.append("v_code", form.value.v_code);
   formData.append("employee_code", form.value.employee_code);
-  formData.append("extra", form.value.extra);
-  formData.append("flavor", form.value.flavor);
+  // formData.append("extra_flavors", form.value.extra);
+  // formData.append("flavor", form.value.flavor);
 
   form.value.products.forEach((product, index) => {
     formData.append(`products[${index}][product_id]`, product.product_id);
@@ -573,6 +588,9 @@ const _createOrder = async () => {
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
     });
+    product.extra_flavors?.forEach((item, index) => {
+      formData.append(`products[${index}][extra_flavors][${index}]`, item);
+    });    
   });
 
       if (imageErrors.value.length > 0)
@@ -716,6 +734,25 @@ const deleteImage = (image) => {
   product.images.splice(product.images.indexOf(image), 1);
 };
 
+const currentProductExtras = computed(() => {
+  return products.value.find(product => product.id == currentProduct.value).extras;
+})
+
+const currentProductFlavors = computed(() => {
+  return products.value.find(product => product.id == currentProduct.value).flavors;
+})
+
+
+const addExtrasFlavors = () => {
+  let product = form.value.products.find(
+    (product) => product.product_id == currentProduct.value,
+  );
+
+  product.extra_flavors = form.value.extra.concat(form.value.flavor);
+
+  ExtraFlavorsDialog.value = false
+}
+
 const currentDay = ref(new Date().toISOString());
 onMounted(() => {
   if (userRole == "admin") {
@@ -852,7 +889,7 @@ onMounted(() => {
       </VCard>
     </VDialog>
     <VDialog v-model="ExtraFlavorsDialog" persistent class="v-dialog-sm">
-      <DialogCloseBtn @click="ExtraFlavorsDialog = !ExtraFlavorsDialog" />
+      <DialogCloseBtn @click="ExtraFlavorsDialog = false" />
 
       <VCard title="Additional Options">
         <VCardText>
@@ -863,8 +900,8 @@ onMounted(() => {
                   placeholder="Flavor"
                   :label="$t('Flavor')"
                   v-model="form.flavor"
-                  :items="[]"
-                  item-value="id"
+                  :items="currentProductFlavors"
+                  item-value="name"
                   item-title="name"
                   variant="outlined"
                   :return-object="false"
@@ -875,11 +912,12 @@ onMounted(() => {
               <VCombobox
                 prepend-inner-icon="tabler-package"
                 v-model="form.extra"
-                :items="[]"
                 item-title="name"
-                item-value="id"
+                :items="currentProductExtras"
+                item-value="name"
                 variant="outlined"
                 :label="$t('Extra')"
+                :return-object="false"
                 class="flex-grow-1 my-1 mx-2"
                 multiple
               />
@@ -888,15 +926,7 @@ onMounted(() => {
         </VCardText>
 
         <VCardText class="d-flex justify-end gap-3 flex-wrap">
-          <VBtn
-            color="secondary"
-            variant="tonal"
-            @click="ExtraFlavorsDialog = false"
-            :disabled="loadingDialog"
-          >
-            Cancel
-          </VBtn>
-          <VBtn @click="ExtraFlavorsDialog = false" :loading="loadingDialog"> OK </VBtn>
+          <VBtn @click="addExtrasFlavors()"> Confirm </VBtn>
         </VCardText>
       </VCard>
     </VDialog>
@@ -978,7 +1008,161 @@ onMounted(() => {
               </VCol>
             </VCol>
           </VForm>
-
+          <VCol
+            v-if="userRole == 'admin' || userRole == 'restaurant'"
+            class="mt-7 px-5 rounded pb-10"
+            style="background-color: rgb(var(--v-theme-surface))"
+          >
+            <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
+              <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+            </VRow>
+            <VCol>
+              <VRow
+                justify="space-between"
+                align="center"
+                :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''"
+              >
+                <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
+                  <AppDateTimePicker
+                    :rules="[requiredValidator]"
+                    :disabled="!form.is_pickup"
+                    prepend-inner-icon="tabler-calendar"
+                    v-model="form.delivery_date"
+                    :placeholder="$t('Choose Date')"
+                    class="flex-grow-1 mx-2 my-1"
+                    :config="{ minDate: today }"
+                    :key="dateKey"
+                    @update:model-value="updateStartEndTime"
+                  />
+                  <AppDateTimePicker
+                    :rules="[requiredValidator]"
+                    :disabled="!form.is_pickup || isClosed || isBranchSelected"
+                    prepend-inner-icon="tabler-clock"
+                    v-model="form.delivery_time"
+                    :placeholder="$t('Enter your time')"
+                    class="flex-grow-1 mx-2 my-1"
+                    :key="timeKey"
+                    :config="{
+                      enableTime: true,
+                      noCalendar: true,
+                      dateFormat: 'H:i',
+                      minTime: branchStart,
+                      maxTime: branchEnd,
+                    }"
+                  />
+                </div>
+                <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
+                  <AppDateTimePicker
+                    :disabled="!form.is_pickup"
+                    prepend-inner-icon="tabler-calendar"
+                    v-model="form.delivery_date"
+                    :placeholder="t('Choose Date')"
+                    class="flex-grow-1 mx-2 my-1"
+                    :config="{ minDate: today }"
+                    :key="dateKey"
+                    @update:model-value="updateStartEndTime"
+                  />
+                  <AppDateTimePicker
+                    :disabled="!form.is_pickup || isClosed"
+                    prepend-inner-icon="tabler-clock"
+                    v-model="form.delivery_time"
+                    :placeholder="t('Enter your time')"
+                    class="flex-grow-1 mx-2 my-1"
+                    :key="timeKey"
+                    :config="{
+                      enableTime: true,
+                      noCalendar: true,
+                      dateFormat: 'H:i',
+                      minTime: branchStart,
+                      maxTime: branchEnd,
+                    }"
+                  />
+                </div>
+                <VRow
+                  class="w-50 mx-2 my-0"
+                  :justify="$vuetify.display.smAndDown ? 'center' : 'start'"
+                >
+                  <VSwitch
+                    v-model="form.is_pickup"
+                    :false-value="false"
+                    :true-value="true"
+                    :inset="false"
+                    :label="t('Schedule Order')"
+                    @update:model-value="_updateBranches"
+                  />
+                </VRow>
+              </VRow>
+          </VCol>
+          <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
+              <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+            </VRow>
+            <VCol>
+              <VRow
+                justify="space-between"
+                align="center"
+                :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''"
+              >
+              <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">
+                <VCombobox
+                  v-if="userRole == 'admin'"
+                  clearable
+                  prepend-inner-icon="tabler-building-community"
+                  :loading="areasLoading"
+                  v-model="form.address_address_area"
+                  :return-object="false"
+                  :items="areas"
+                  item-value="name"
+                  item-title="name"
+                  style="width: 100%"
+                  variant="outlined"
+                  :rules="[requiredValidator]"
+                  :label="$t('Area')"
+                  class="flex-grow-1 my-1 w-100"
+                  @update:model-value="updateStartEndTime()"
+                />
+                <VCombobox
+                  v-if="userRole == 'restaurant'"
+                  clearable
+                  prepend-inner-icon="tabler-building-community"
+                  :loading="areasLoading"
+                  v-model="form.address_address_area"
+                  :items="areas"
+                  item-value="name"
+                  item-title="name"
+                  :return-object="false"
+                  style="width: 100%"
+                  variant="outlined"
+                  :rules="[requiredValidator]"
+                  :label="($t('Area'))"
+                  class="flex-grow-1 my-1 w-100"
+                  @update:model-value="updateStartEndTime()"
+  />
+              </VCol>
+              <VCol cols="6" class="ma-0 py-0 pe-0 ps-2">
+                <VSelect
+                  clearable
+                  prepend-inner-icon="tabler-building-store"
+                  placeholder="Select a Branch"
+                  :rules="[requiredValidator]"
+                  :label="$t('Branch')"
+                  :loading="branchesLoading"
+                  v-model="form.branch_id"
+                  :items="availableBranches"
+                  item-value="id"
+                  :item-title="langIdentifier"
+                  style="width: 100%"
+                  variant="outlined"
+                  :return-object="false"
+                  :disabled="!form.address_address_area || form.address_address_area == ''"
+                  @update:model-value="updateStartEndTime"
+                  class="w-100 flex-grow-1"
+                />
+              </VCol>
+              </VRow>
+              </VCol>
+            </VCol>
           <VCol
             class="mt-7 px-5 rounded pb-10"
             style="background-color: rgb(var(--v-theme-surface))"
@@ -1081,40 +1265,6 @@ onMounted(() => {
             <p class="text-h4 pt-3 mb-1">{{ $t('User Address') }}</p>
             <VCol>
               <VRow justify="space-between" align="end">
-                <VCombobox
-                  v-if="userRole == 'admin'"
-                  clearable
-                  prepend-inner-icon="tabler-building-community"
-                  :loading="areasLoading"
-                  v-model="form.address_address_area"
-                  :return-object="false"
-                  :items="areas"
-                  item-value="name"
-                  item-title="name"
-                  style="width: 100%"
-                  variant="outlined"
-                  :rules="[requiredValidator]"
-                  :label="$t('Area')"
-                  class="flex-grow-0 my-1 w-50 mx-2"
-                  @update:model-value="updateStartEndTime()"
-                />
-                <VCombobox
-                  v-if="userRole == 'restaurant'"
-                  clearable
-                  prepend-inner-icon="tabler-building-community"
-                  :loading="areasLoading"
-                  v-model="form.address_address_area"
-                  :items="areas"
-                  item-value="name"
-                  item-title="name"
-                  :return-object="false"
-                  style="width: 100%"
-                  variant="outlined"
-                  :rules="[requiredValidator]"
-                  :label="($t('Area'))"
-                  class="flex-grow-0 my-1 w-50 mx-2"
-                  @update:model-value="updateStartEndTime()"
-  />
                 <AppTextField
                   prepend-inner-icon="tabler-container"
                   :label="$t('Building Number')"
@@ -1123,8 +1273,6 @@ onMounted(() => {
                   class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_building_no"
                 ></AppTextField>
-              </VRow>
-              <VRow justify="space-between" align="end" class="mt-6">
                 <AppTextField
                   prepend-inner-icon="tabler-stairs"
                   :placeholder="$t('Floor')"
@@ -1133,6 +1281,8 @@ onMounted(() => {
                   class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_floor"
                 ></AppTextField>
+              </VRow>
+              <VRow justify="space-between" align="end" class="mt-6">
                 <AppTextField
                   prepend-inner-icon="tabler-window"
                   :label="$t('Apartment')"
@@ -1141,8 +1291,6 @@ onMounted(() => {
                   class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_apartment"
                 ></AppTextField>
-              </VRow>
-              <VRow justify="space-between" align="end" class="mt-6">
                 <AppTextField
                   prepend-inner-icon="tabler-road"
                   :placeholder="$t('Street Name')"
@@ -1151,6 +1299,8 @@ onMounted(() => {
                   class="flex-grow-1 mx-2 my-1"
                   v-model="form.address_street_name"
                 ></AppTextField>
+              </VRow>
+              <VRow justify="space-between" align="end" class="mt-6">
                 <AppTextField
                   prepend-inner-icon="tabler-number"
                   :rules="[requiredValidator]"
@@ -1162,94 +1312,6 @@ onMounted(() => {
               </VRow>
             </VCol>
           </VCol>
-
-          <VCol
-            v-if="userRole == 'admin' || userRole == 'restaurant'"
-            class="mt-7 px-5 rounded pb-10"
-            style="background-color: rgb(var(--v-theme-surface))"
-          >
-            <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
-              <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
-              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
-            </VRow>
-            <VCol>
-              <VRow
-                justify="space-between"
-                align="center"
-                :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''"
-              >
-                <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker
-                    :rules="[requiredValidator]"
-                    :disabled="!form.is_pickup"
-                    prepend-inner-icon="tabler-calendar"
-                    v-model="form.delivery_date"
-                    :placeholder="$t('Choose Date')"
-                    class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: today }"
-                    :key="dateKey"
-                    @update:model-value="updateStartEndTime"
-                  />
-                  <AppDateTimePicker
-                    :rules="[requiredValidator]"
-                    :disabled="!form.is_pickup || isClosed || isBranchSelected"
-                    prepend-inner-icon="tabler-clock"
-                    v-model="form.delivery_time"
-                    :placeholder="$t('Enter your time')"
-                    class="flex-grow-1 mx-2 my-1"
-                    :key="timeKey"
-                    :config="{
-                      enableTime: true,
-                      noCalendar: true,
-                      dateFormat: 'H:i',
-                      minTime: branchStart,
-                      maxTime: branchEnd,
-                    }"
-                  />
-                </div>
-                <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker
-                    :disabled="!form.is_pickup"
-                    prepend-inner-icon="tabler-calendar"
-                    v-model="form.delivery_date"
-                    :placeholder="t('Choose Date')"
-                    class="flex-grow-1 mx-2 my-1"
-                    :config="{ minDate: today }"
-                    :key="dateKey"
-                    @update:model-value="updateStartEndTime"
-                  />
-                  <AppDateTimePicker
-                    :disabled="!form.is_pickup || isClosed"
-                    prepend-inner-icon="tabler-clock"
-                    v-model="form.delivery_time"
-                    :placeholder="t('Enter your time')"
-                    class="flex-grow-1 mx-2 my-1"
-                    :key="timeKey"
-                    :config="{
-                      enableTime: true,
-                      noCalendar: true,
-                      dateFormat: 'H:i',
-                      minTime: branchStart,
-                      maxTime: branchEnd,
-                    }"
-                  />
-                </div>
-                <VRow
-                  class="w-50 mx-2 my-0"
-                  :justify="$vuetify.display.smAndDown ? 'center' : 'start'"
-                >
-                  <VSwitch
-                    v-model="form.is_pickup"
-                    :false-value="false"
-                    :true-value="true"
-                    :inset="false"
-                    :label="t('Schedule Order')"
-                    @update:model-value="_updateBranches"
-                  />
-                </VRow>
-              </VRow>
-            </VCol>
-          </VCol>
         </VCol>
 
         <VCol class="pt-0" :cols="$vuetify.display.smAndDown ? 12 : 4">
@@ -1258,8 +1320,8 @@ onMounted(() => {
             style="background-color: rgb(var(--v-theme-surface))"
           >
             <p class="text-h4 pt-3 mb-5">{{ $t('Order Summary') }}</p>
-            <VCol>
-              <VRow justify="space-between" align="center">
+            <VCol class="pt-0">
+              <!-- <VRow justify="space-between" align="center">
                 <VSelect
                   clearable
                   prepend-inner-icon="tabler-building-store"
@@ -1274,11 +1336,12 @@ onMounted(() => {
                   style="width: 100%"
                   variant="outlined"
                   :return-object="false"
+                  :disabled="!form.address_address_area || form.address_address_area == ''"
                   @update:model-value="updateStartEndTime"
                 />
-              </VRow>
-              <VRow class="mt-4">
-                <VCol class="w-100 px-0">
+              </VRow> -->
+              <VRow class="mt-0">
+                <VCol class="w-100 px-0 pt-0">
                   <AppTextField
                     v-if="isAnEmployee"
                     class="w-100 flex-grow-1"
