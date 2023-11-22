@@ -77,9 +77,9 @@ const langIdentifier = computed(() => {
                   product.quantity }}</VChip>
               </VRow>
             </VRow>
-            <VRow v-if="cart_extra_flavor.length > 0">
-              <VCard class="ma-5 ml-0 w-100" v-for="(item, index) in cart_extra_flavor" :key="index">
-                <VCardText>
+            <VRow v-if="product.cart_extra_flavor?.length > 0">
+              <VCard class="ma-5 ml-0 w-100" v-for="(item, index) in product.cart_extra_flavor" :key="index">
+                <VCardText class="d-flex justify-between align-center">
                   <div>Name: {{ item.name }}</div>
                   <div>Price: {{ item.price }}</div>
                   <div>Quantity: {{ item.quantity }}</div>
