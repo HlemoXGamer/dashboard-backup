@@ -326,9 +326,6 @@ onMounted(() => {
             <VCombobox multiple prepend-inner-icon="tabler-package" :return-object="false" :items="flavors" item-value="id"
               item-title="name" v-model="form.flavors" class="flex-grow-1 ms-1 mt-3" :label="$t('Select Flavor')">
             </VCombobox>
-            <AppTextField prepend-inner-icon="tabler-numbers" v-model="form.extra_quantity"
-              :rules="[requiredIfValidator(form.extra_quantity, form.is_pre === 1)]" class="flex-grow-1 ms-1 mt-3"
-              :placeholder="$t('extra_quantity')"></AppTextField>
           </VRow>
           <!-- <VRow v-if="userRole == 'admin'" class="mt-2" justify="space-between" align="center" style="gap: 5px">
                 <VCombobox

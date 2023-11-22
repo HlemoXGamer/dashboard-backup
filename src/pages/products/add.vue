@@ -264,13 +264,6 @@ onMounted(() => {
                   class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
-                <AppTextField
-                  prepend-inner-icon="tabler-number"
-                  v-model="form.extra_quantity"
-                  :rules="[requiredIfValidator(form.extra_quantity, form.is_pre === 1)]"
-                  class="flex-grow-1 ms-1 mt-3"
-                  :placeholder="$t('extra_quantity')"
-                ></AppTextField>
               </VRow>
           </VCol>
         </VCol>
