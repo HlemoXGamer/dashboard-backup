@@ -75,6 +75,18 @@ const headers = computed(() => {
         key: "total_amount",
         width: '200px'
       },
+      {
+        title: t("Delivery Date"),
+        sortable: false,
+        key: "delivery_date",
+        width: '200px'
+      },
+      {
+        title: t("Created By"),
+        sortable: false,
+        key: "created_by",
+        width: '200px'
+      },
     ]
   }
 })
