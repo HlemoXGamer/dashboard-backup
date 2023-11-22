@@ -1,1 +1,0 @@
-import{bb as s,ba as r}from"./index-4413d20e.js";let{get:o,show:a,update:c,create:u,remove:d}=s("/products");const p=e=>r.post("/products/images",e);function g(e){return r.get(`/products/order_product?${e}`)}export{g as a,p as b,u as c,o as g,d as r,a as s,c as u};

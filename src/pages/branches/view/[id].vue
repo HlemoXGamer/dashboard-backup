@@ -5,10 +5,12 @@ import { getBranchesLog } from '@/apis/admin/branches'
 
 import { useRoute } from "vue-router";
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
-const voucherId = useRoute().params.id;
 const areasData = ref([]);
 const branchesLog = ref([]);
-
+const dateDialog = ref(false);
+const pickedFromDate = ref(null);
+const pickedToDate = ref(null);
+const loading = ref(false);
 const form = ref({
   start: "",
   end: "",
@@ -86,9 +88,52 @@ const _showBranch = async () => {
 
 const _getBranchesLog = () => {
   getBranchesLog(branchId).then(({data, meta}) => {
-    branchesLog.value = data.data
-    console.log('BranchesLog', branchesLog.value);
+    branchesLog.value = data.data;
   })
+}
+
+const getStats = (custom) => {
+    loading.value = true;
+    if(custom === true){
+        dateDialog.value = false;
+        let from = pickedFromDate.value;
+        let to = pickedToDate.value;
+        if(userRole == "admin"){
+            getBranchesLog(`${selectedButton.value}&branchId${branchId}${from !== null ? '&from='+from : ''}${to !== null ? '&to='+to : ''}`).then(({data}) => {
+                branchesLog.value = data.data;
+            }).finally(() => {
+                loading.value = false;
+            })
+        }
+    }else{
+        if(userRole == "admin"){
+            getBranchesLog(`${selectedButton.value}&branchId${branchId}`).then(({data}) => {
+              branchesLog.value = data.data;
+            }).finally(() => {
+                loading.value = false;
+            })
+        }
+    }
+}
+
+const closeDateDialog = () => {
+  dateDialog.value = false;
+  selectedButton.value = "today";
+  pickedFromDate.value = ref(null);
+  pickedToDate.value = ref(null);
+  getStats(true);
+}
+
+const isCustom = (type) => {
+  if(type == selectedButton.value && type !== "custom") return;
+  selectedButton.value = type;
+    setTimeout(() => {
+        if(type == "custom"){
+            dateDialog.value = true;
+        }else{
+            getStats(false);
+        }
+    }, 100)
 }
 
 onMounted(() => {
@@ -99,23 +144,42 @@ onMounted(() => {
 });
 </script>
 <template>
+  <div>
+    <VDialog v-model="dateDialog" persistent class="v-dialog-sm">
+          <DialogCloseBtn @click="closeDateDialog()" />
+          <VCard :title="$t('Pick a custom Date')">
+            <VCardText class="d-flex ">
+              <AppDateTimePicker class="me-1" :placeholder="$t('From')" prepend-inner-icon="tabler-calendar"
+                v-model="pickedFromDate" />
+              <AppDateTimePicker class="ms-1" :placeholder="$t('To')" prepend-inner-icon="tabler-calendar" v-model="pickedToDate" />
+            </VCardText>
+            <VCardText class="d-flex justify-end gap-3 flex-wrap">
+              <VBtn @click="getStats(true)" :loading="loading" :disabled="!pickedFromDate && !pickedToDate">
+                {{ $t('Pick') }}
+              </VBtn>
+            </VCardText>
+          </VCard>
+        </VDialog>
   <VRow class="mt-4 px-4" justify="space-around">
     <VCol class="pt-0">
       <BranchesViewSummary :data="form" :cities="cities" />
       <VRow class="gap-5 pt-16 pl-3 pb-0">
         <VBtn
+        :loading="loading"
           :variant="getButtonVariant('today')"
-          @click="selectedButton = 'today'"
+          @click="isCustom('today')"
           >Today</VBtn
         >
         <VBtn
+        :loading="loading"
           :variant="getButtonVariant('yesterday')"
-          @click="selectedButton = 'yesterday'"
+          @click="isCustom('yesterday')"
           >Yesterday</VBtn
         >
         <VBtn
+        :loading="loading"
           :variant="getButtonVariant('custom')"
-          @click="selectedButton = 'custom'"
+          @click="isCustom('custom')"
           >Custom</VBtn
         >
       </VRow>
@@ -128,6 +192,7 @@ onMounted(() => {
       </VCol>
     </VCol>
   </VRow>
+</div>
 </template>
 
 <route lang="yaml">

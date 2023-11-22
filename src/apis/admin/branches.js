@@ -11,5 +11,5 @@ export function setServiceCost(data) {
 }
 
 export function getBranchesLog(data) {
-  return service.get(`/product-history?branchId=${data}`)
+  return service.get(`/product-history?${data}`)
 }
