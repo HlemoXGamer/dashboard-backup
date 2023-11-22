@@ -44,20 +44,20 @@ export default [
     title: "Products",
     to: { name: "products" },
     icon: { icon: "tabler-baguette" },
-    // children: [
-    //   {
-    //     title: "Products",
-    //     to: { name: "products" },
-    //     icon: { icon: "tabler-baguette" },
-    //     roles: ["admin", "markter"],
-    //   },
-    //   {
-    //     title: 'Extra And Flavors',
-    //     to: { name: "extra-flavors" },
-    //     icon: { icon: "tabler-baguette" },
-    //     roles: ["admin"],
-    //   },
-    // ],
+    children: [
+      {
+        title: "Products",
+        to: { name: "products" },
+        icon: { icon: "tabler-baguette" },
+        roles: ["admin", "markter"],
+      },
+      {
+        title: 'Extra And Flavors',
+        to: { name: "extra-flavors" },
+        icon: { icon: "tabler-baguette" },
+        roles: ["admin"],
+      },
+    ],
     roles: ["admin", "markter"],
   },
   {

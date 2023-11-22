@@ -30,12 +30,12 @@ const putNotes = (notes) => {
   isDialogVisible.value = true;
 };
 const langIdentifier = computed(() => {
-    if ($useI18n.locale.value === 'en') {
-      return 'name_en';
-    } else if ($useI18n.locale.value === 'ar') {
-      return 'name_ar';
-    }
-  });
+  if ($useI18n.locale.value === 'en') {
+    return 'name_en';
+  } else if ($useI18n.locale.value === 'ar') {
+    return 'name_ar';
+  }
+});
 </script>
 
 <template>
@@ -53,20 +53,11 @@ const langIdentifier = computed(() => {
       </VCard>
     </VDialog>
 
-    <VCol
-      class="mt-0 px-5 rounded pb-6"
-      style="background-color: rgb(var(--v-theme-surface))"
-    >
+    <VCol class="mt-0 px-5 rounded pb-6" style="background-color: rgb(var(--v-theme-surface))">
       <VRow class="mx-0 my-0" align="center" justify="space-between">
         <p class="text-h4 pt-3 mb-0">{{ $t('Details') }}</p>
-        <VChip
-          class="text-h6"
-          variant="tonal"
-          color="success"
-          size="default"
-          v-if="props.status"
-          >{{ props.status.toUpperCase() }}</VChip
-        >
+        <VChip class="text-h6" variant="tonal" color="success" size="default" v-if="props.status">{{
+          props.status.toUpperCase() }}</VChip>
       </VRow>
       <VCol class="px-0 mx-0" v-for="product in props.products">
         <VCard class="px-5 py-3 mt-3" variant="tonal">
@@ -80,42 +71,27 @@ const langIdentifier = computed(() => {
                   {{ product.quantity }} X {{ product.price }} =
                   {{ Number(product.price * product.quantity).toFixed(2) }} KWD
                 </p>
-                <VBtn
-                  v-if="product.has_note == 1 && product.cart_notes.length > 0"
-                  size="small"
-                  class="px-2 me-3"
-                  @click="putNotes(product.cart_notes)"
-                  >{{ $t('Check Notes') }}</VBtn
-                >
-                <VChip
-                  size="large"
-                  color="primary"
-                  variant="flat"
-                  class="font-weight-bold justify-center align-center"
-                  >{{ product.quantity }}</VChip
-                >
+                <VBtn v-if="product.has_note == 1 && product.cart_notes.length > 0" size="small" class="px-2 me-3"
+                  @click="putNotes(product.cart_notes)">{{ $t('Check Notes') }}</VBtn>
+                <VChip size="large" color="primary" variant="flat" class="font-weight-bold justify-center align-center">{{
+                  product.quantity }}</VChip>
               </VRow>
             </VRow>
-            <VRow
-              align="center"
-              justify="space-between"
-              class="mt-7"
-              v-if="product.has_image == 1 && product.cart_images.length"
-            >
-              <div
-                class="mx-1 position-relative cart_image"
-                v-for="image in product.cart_images"
-              >
-                <div
-                  class="cart_image_download position-absolute d-flex align-center justify-center w-100 h-100"
-                >
-                  <VBtn
-                    size="40"
-                    color="primary"
-                    rounded="xl"
-                    class="py-2 px-2"
-                    @click="downloadImage(image.file)"
-                  >
+            <VRow v-if="cart_extra_flavor.length > 0">
+              <VCard class="ma-5 ml-0 w-100" v-for="(item, index) in cart_extra_flavor" :key="index">
+                <VCardText>
+                  <div>Name: {{ item.name }}</div>
+                  <div>Price: {{ item.price }}</div>
+                  <div>Quantity: {{ item.quantity }}</div>
+                </VCardText>
+              </VCard>
+            </VRow>
+
+            <VRow align="center" justify="space-between" class="mt-7"
+              v-if="product.has_image == 1 && product.cart_images.length">
+              <div class="mx-1 position-relative cart_image" v-for="image in product.cart_images">
+                <div class="cart_image_download position-absolute d-flex align-center justify-center w-100 h-100">
+                  <VBtn size="40" color="primary" rounded="xl" class="py-2 px-2" @click="downloadImage(image.file)">
                     <VIcon icon="tabler-cloud-download" size="22" />
                   </VBtn>
                 </div>
@@ -135,12 +111,14 @@ const langIdentifier = computed(() => {
   height: 120px;
   border-radius: 10px;
   overflow: hidden;
+
   &:hover {
     .cart_image_download {
       opacity: 1;
       transition: 0.3s;
     }
   }
+
   .cart_image_download {
     background-color: rgba(0, 0, 0, 0.513);
     transition: 0.3s;

@@ -44,13 +44,13 @@ const props = defineProps({
 <template>
   <VDataTable :headers="headers" class="pb-5 mt-8">
     <template #item.actions="{ item }">
-      <!-- <IconBtn class="position-relative">
+      <IconBtn v-if="item?.raw?.extra || item?.raw?.flavor" class="position-relative">
         <VIcon icon="tabler-ad-2" @click="$emit('add-extra-flavors', item.raw)" />
         <span
           class="badge position-absolute bg-error"
           >1</span
         >
-      </IconBtn> -->
+      </IconBtn>
       <IconBtn v-if="item.raw.has_image == 1" class="position-relative">
         <VIcon icon="tabler-photo-plus" @click="$emit('add-image', item.raw)" />
         <span

@@ -3,40 +3,29 @@ import { VDataTable } from "vuetify/labs/VDataTable";
 import { useI18n } from "vue-i18n";
 const $useI18n = useI18n();
 const t = $useI18n.t;
-const resolveStatusVariant = (status) => {
-  if (status === 'activate') {
-    return {
-      color: "success",
-      text: t("Activate"),
-    };
-  } else {
-    if (status === 'deactivate') {
-      return {
-        color: "secondary",
-        text: t("Deactivate"),
-      };
-    }
-  }
-};
 const headers = computed(() => [
   {
-    title: t("Branch"),
-    key: "branch_id",
+    title: t("Day"),
+    key: "day",
   },
   {
-    title: t("Description"),
+    title: t("Time"),
     sortable: false,
-    key: "details",
+    key: "time",
   },
   {
-    title: t("Changed At"),
+    title: t("Item Name"),
     sortable: false,
-    key: "updated_at",
+    key: "item_name",
   },
   {
-    title: t("Status"),
+    title: t("Action"),
     sortable: false,
     key: "action",
+  },{
+    title: t("Details"),
+    sortable: false,
+    key: "details",
   },
 ]);
 

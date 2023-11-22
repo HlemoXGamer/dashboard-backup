@@ -28,7 +28,7 @@ const stats = ref({
 });
 const $useI18n = useI18n()
 const t = $useI18n.t;
-const statuses = [
+const statuses = computed(() => [
 {
     title: t("Custom"),
     value: "custom",
@@ -44,7 +44,7 @@ const statuses = [
 {
     title: t("Today"),
     value: "today",
-}]
+}])
 
 const branch_chart = {
   labels: [

@@ -348,6 +348,7 @@ onMounted(() => {
           :discountType="order?.discount_type"
           :discountRate="order?.discount_rate"
           :deliveryCost="order?.delivery_cost"
+          :extraCost="10"
         />
 
         <VCol

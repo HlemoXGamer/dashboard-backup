@@ -6,7 +6,7 @@ import { useToast } from "vue-toastification";
 import { VForm } from "vuetify/components/VForm";
 const toast = useToast();
 const loading = ref(false);
-const form = ref({ name: "", type: "", price: null });
+const form = ref({ name: "", type: "", price: 0, code: '', });
 const refVForm = ref();
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 import router from "@/router";

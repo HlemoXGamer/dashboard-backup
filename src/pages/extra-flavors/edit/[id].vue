@@ -8,7 +8,7 @@ import { VForm } from "vuetify/components/VForm";
 const toast = useToast();
 const loading = ref(false);
 const extraFlavorId = useRoute().params.id;
-const form = ref({ name: "", type: "", price: 0 });
+const form = ref({ name: "", type: "", price: 0, code: "", });
 const refVForm = ref();
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 
@@ -60,43 +60,29 @@ onMounted(() => {
           <VCol>
             <VRow justify="space-between" align="end">
               <VCol>
-                <AppTextField
-                  :rules="[requiredValidator]"
-                  style="width: 100%"
-                  class="pe-3"
-                  v-model="form.name"
-                  label="Name"
-                ></AppTextField>
+                <AppTextField :rules="[requiredValidator]" style="width: 100%" class="pe-3" v-model="form.code"
+                  label="Code"></AppTextField>
               </VCol>
               <VCol>
-                <VSelect
-                  v-model="form.type"
-                  :items="[
-                    {
-                      name: 'Extra',
-                      value: 'extra'
-                    },
-                    {
-                      name: 'Flavor',
-                      value: 'flavor'
-                    },
-                  ]"
-                  :rules="[requiredValidator]"
-                  item-title="name"
-                  item-value="value"
-                  style="width: 100%; align-self: flex-end;"
-                  label="Type"
-                ></VSelect>
+                <AppTextField :rules="[requiredValidator]" style="width: 100%" class="pe-3" v-model="form.name"
+                  label="Name"></AppTextField>
               </VCol>
               <VCol>
-                <AppTextField
-                  :rules="[requiredValidator, integerValidator]"
-                  style="width: 100%"
-                  class="pe-3"
-                  v-model="form.price"
-                  label="Price"
-                  :disabled="isFlavor"
-                ></AppTextField>
+                <VSelect v-model="form.type" :items="[
+                  {
+                    name: 'Extra',
+                    value: 'extra'
+                  },
+                  {
+                    name: 'Flavor',
+                    value: 'flavor'
+                  },
+                ]" :rules="[requiredValidator]" item-title="name" item-value="value"
+                  style="width: 100%; align-self: flex-end;" label="Type"></VSelect>
+              </VCol>
+              <VCol>
+                <AppTextField :rules="[requiredValidator, integerValidator]" style="width: 100%" class="pe-3"
+                  v-model="form.price" label="Price" :disabled="isFlavor"></AppTextField>
               </VCol>
             </VRow>
           </VCol>

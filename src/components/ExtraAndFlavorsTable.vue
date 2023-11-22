@@ -21,6 +21,10 @@ const toast = useToast();
 const deleteDialog = ref(false);
 const headers = computed(() => [
   {
+    title: t("Code"),
+    key: 'code',
+  },
+  {
     title: t("Name"),
     key: langIdentifier,
   },

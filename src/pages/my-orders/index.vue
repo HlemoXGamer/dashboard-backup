@@ -24,7 +24,7 @@ const form = ref({
   selectedDateFrom: [],
   selectedDateTo: [],
 });
-const statuses = ref([
+const statuses = computed(() => [
   { name: t("Created"), value: "created" },
   { name: t("Paid"), value: "paid" },
   { name: t("In Progress"), value: "in_progress" },

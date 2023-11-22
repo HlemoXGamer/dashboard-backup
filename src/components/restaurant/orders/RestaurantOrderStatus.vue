@@ -22,7 +22,7 @@ const props = defineProps({
     default: "",
   },
 });
-const statuses = ref([
+const statuses = computed(() => [
   { id: 0, name: t("Created"), value: "created", itemDisabled: true },
   { id: 1, name: t("Paid"), value: "paid", itemDisabled: true, disabled: true },
   { id: 2, name: t("In Progress"), value: "in_progress", itemDisabled: true },

@@ -21,7 +21,7 @@ const loading = ref(false);
 const loadings = ref({
     export: false
 });
-const statuses = [
+const statuses = computed(() => [
     {
         title: t("Custom"),
         value: "custom",
@@ -37,7 +37,7 @@ const statuses = [
     {
         title: t("Today"),
         value: "today",
-    }]
+    }])
 
 const stats = ref({
     orders: "",

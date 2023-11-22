@@ -43,15 +43,15 @@ const restaurantFilters = ref({
   to: null,
   delivery: null,
 });
-const statuses = ref([
-  { name: t("Created"), value: "created" },
-  { name: t("Paid"), value: "paid" },
-  { name: t("In Progress"), value: "in_progress" },
-  { name: t("Ready For Delivery"), value: "ready_for_delivery" },
-  { name: t("On The Way"), value: "on_the_way" },
-  { name: t("Delivered"), value: "delivered" },
-  { name: t("Cancelled"), value: "cancelled" },
-]);
+const statuses = computed(() => [
+      { name: t("Created"), value: "created" },
+      { name: t("Paid"), value: "paid" },
+      { name: t("In Progress"), value: "in_progress" },
+      { name: t("Ready For Delivery"), value: "ready_for_delivery" },
+      { name: t("On The Way"), value: "on_the_way" },
+      { name: t("Delivered"), value: "delivered" },
+      { name: t("Cancelled"), value: "cancelled" },
+    ]);
 
 const sortedBy = ref();
 const handlePageUpdate = (n) => {

@@ -308,9 +308,9 @@ const updateStartEndTime = () => {
   // startTime.value = new Date().toTimeString().slice(0, 5);
   // branchStart.value = new Date().toTimeString().slice(0, 5);
 
-  timeKey.value += 1;
+    timeKey.value += 1;
 
-  _updateTime();
+    _updateTime();
 }
 
 

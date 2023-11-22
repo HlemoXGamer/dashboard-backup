@@ -128,7 +128,7 @@ onMounted(() => {
       <VTabs v-model="currentTab" class="mx-auto v-tabs-pill">
         <VTab value="products">{{ $t('Products') }}</VTab>
         <VTab value="closed_products">{{ $t('Closed Products') }}</VTab>
-        <!-- <VTab v-if="userRole === 'admin'" value="pre_products">{{ $t('Pre Products') }}</VTab> -->
+        <VTab v-if="userRole === 'admin'" value="pre_products">{{ $t('Pre Products') }}</VTab>
       </VTabs>
       <VSpacer />
     </VRow>

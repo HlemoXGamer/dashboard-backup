@@ -12,7 +12,7 @@ import { create as addMarkterProduct } from "@/apis/markter/products";
 
 import router from "@/router";
 import { toBase64 } from "@/utils/files";
-import { numericValidator, requiredValidator } from "@validators";
+import { numericValidator, requiredValidator, requiredIfValidator } from "@validators";
 import { useToast } from "vue-toastification";
 const images = ref([]);
 const imagesArray = ref([]);
@@ -37,9 +37,10 @@ const form = ref({
   prep_time: "",
   price: "",
   status: 0,
-  // extra: [],
-  // flavor: [],
-  // is_pre: 0,
+  extras: [],
+  flavors: [],
+  extra_quantity:1,
+  is_pre: 0,
 });
 const refVForm = ref();
 const binaryImages = ref([]);
@@ -75,7 +76,12 @@ const _addProduct = async () => {
       formData.append("price", form.value.price);
       formData.append("status", form.value.status);
       // formData.append("extra_flavors", form.value.extras.concat(form.value.flavors));
-      // formData.append("is_pre", form.value.is_pre);
+      formData.append("is_pre", form.value.is_pre);
+      form.value.extras.concat(form.value.flavors).forEach((extra_flavor, index) => {
+        formData.append(`extra_flavors[${index}]`, extra_flavor);
+      });
+
+      formData.append("quantity", form.value.extra_quantity);
 
       binaryImages.value.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
@@ -171,14 +177,14 @@ onMounted(() => {
                 prepend-inner-icon="tabler-package"
                 v-model="form.name_en"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 mr-1"
+                class="flex-grow-1 me-1"
                 label="Name"
               ></AppTextField>
               <AppTextField
                 append-inner-icon="tabler-package"
                 v-model="form.name_ar"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 ml-1 text-right"
+                class="flex-grow-1 ms-1 text-right"
                 dir="rtl"
                 label="الاسم"
               ></AppTextField>
@@ -187,13 +193,13 @@ onMounted(() => {
               <AppTextarea
                 v-model="form.description_en"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 mr-1"
+                class="flex-grow-1 me-1"
                 label="Description"
               ></AppTextarea>
               <AppTextarea
                 v-model="form.description_ar"
                 :rules="[requiredValidator]"
-                class="flex-grow-1 ml-1 text-right"
+                class="flex-grow-1 ms-1 text-right"
                 dir="rtl"
                 label="الوصف"
               ></AppTextarea>
@@ -203,7 +209,7 @@ onMounted(() => {
                   prepend-inner-icon="tabler-coins"
                   v-model="form.price"
                   :rules="[requiredValidator, numericValidator]"
-                  class="flex-grow-1 mr-1"
+                  class="flex-grow-1 me-1"
                   :label="$t('Product Price')"
                 ></AppTextField>
                 <VCombobox
@@ -215,7 +221,7 @@ onMounted(() => {
                   item-title="name_en"
                   :rules="[requiredValidator]"
                   v-model="form.categories"
-                  class="flex-grow-1 ml-1 mt-6"
+                  class="flex-grow-1 ms-1 mt-6"
                   :label="$t('Select Category')"
                 ></VCombobox>
               </VRow>
@@ -224,40 +230,48 @@ onMounted(() => {
                   prepend-inner-icon="tabler-dna-2"
                   v-model="form.code"
                   :rules="[requiredValidator]"
-                  class="flex-grow-1 mr-1"
+                  class="flex-grow-1 me-1"
                   :label="$t('Product Code')"
                 ></AppTextField>
                 <AppTextField
                   prepend-inner-icon="tabler-clock"
                   v-model="form.prep_time"
                   :rules="[requiredValidator]"
-                  class="flex-grow-1 ml-1"
+                  class="flex-grow-1 ms-1"
                   :label="$t('Preparation Time')"
                 ></AppTextField>
               </VRow>
-              <!-- <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
+               <VRow v-if="userRole == 'admin'" class="mt-10" justify="space-between" align="center">
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   multiple
                   :return-object="false"
-                  :items="exters"
+                  :items="extras"
                   item-value="id"
                   item-title="name"
-                  v-model="form.extra"
-                  class="flex-grow-1 ml-1 mt-6"
+                  v-model="form.extras"
+                  class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Extra')"
                 ></VCombobox>
                 <VCombobox
                   prepend-inner-icon="tabler-package"
                   :return-object="false"
                   :items="flavors"
+                  multiple
                   item-value="id"
                   item-title="name"
-                  v-model="form.flavor"
-                  class="flex-grow-1 ml-1 mt-6"
+                  v-model="form.flavors"
+                  class="flex-grow-1 ms-1 mt-3"
                   :label="$t('Select Flavor')"
                 ></VCombobox>
-              </VRow> -->
+                <AppTextField
+                  prepend-inner-icon="tabler-number"
+                  v-model="form.extra_quantity"
+                  :rules="[requiredIfValidator(form.extra_quantity, form.is_pre === 1)]"
+                  class="flex-grow-1 ms-1 mt-3"
+                  :placeholder="$t('extra_quantity')"
+                ></AppTextField>
+              </VRow>
           </VCol>
         </VCol>
       </VCol>
@@ -334,13 +348,13 @@ onMounted(() => {
             :true-value="1"
             :label="$t('Need Note')"
           />
-          <!-- <VSwitch
+          <VSwitch
             v-model="form.is_pre"
             :inset="false"
             :false-value="0"
             :true-value="1"
             :label="$t('Is Pre')"
-          /> -->
+          />
         </VCol>
         <VRow class="px-5 mt-2">
           <VBtn color="primary" :loading="loading" type="submit" block
