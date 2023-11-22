@@ -38,6 +38,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  isPreValid: {
+    type: Boolean,
+    default: false
+  }
 });
 </script>
 
@@ -45,13 +49,13 @@ const props = defineProps({
   <VDataTable :headers="headers" class="pb-5 mt-8">
     <template #item.actions="{ item }">
       <div class="d-flex flex-wrap justify-center">
-        <div v-if="item?.raw?.is_pre === 1" style="width: fit-content;">
+        <div v-if="item?.raw?.is_pre === 1 && isPreValid" style="width: fit-content;">
         <IconBtn v-if="item?.raw?.extras?.length || item?.raw?.flavors?.length" class="position-relative" @click="$emit('add-extra-flavors', item.raw)">
           <VIcon icon="tabler-candy" />
         </IconBtn>
         </div>
-        <IconBtn v-if="item.raw.has_image == 1" class="position-relative">
-          <VIcon icon="tabler-photo-plus" @click="$emit('add-image', item.raw)" />
+        <IconBtn v-if="item.raw.has_image == 1" class="position-relative" @click="$emit('add-image', item.raw)">
+          <VIcon icon="tabler-photo-plus" />
           <span
             v-if="
               item.raw.quantity !== item.raw.images &&
@@ -62,10 +66,9 @@ const props = defineProps({
             >{{ item.raw.quantity - item.raw.images }}</span
           >
         </IconBtn>
-        <IconBtn v-if="item.raw.has_note == 1">
+        <IconBtn v-if="item.raw.has_note == 1" @click="$emit('add-note', item.raw)" >
           <VIcon
             icon="tabler-clipboard-text"
-            @click="$emit('add-note', item.raw)"
           />
         </IconBtn>
         <IconBtn>

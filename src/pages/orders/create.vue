@@ -80,6 +80,7 @@ const isClosed = ref(false);
 const branchStartBackup = ref(null);
 const dateKey = ref(1);
 const isBranchSelected = false;
+const isPreValid = ref(false);
 const form = ref({
   is_pickup: true,
   products: [],
@@ -100,8 +101,8 @@ const form = ref({
   branch_id: null,
   v_code: "",
   employee_code: "",
-  extra: '',
-  flavor: '',
+  extra: null,
+  flavor: null,
 });
 
 const imageErrors = ref([]);
@@ -375,6 +376,7 @@ const addProduct = () => {
 const _updateBranches = () => {
   const date = new Date();
   form.value.delivery_time = null;
+  isPreValid.value = false;
     if (form.value.is_pickup === false) {
       form.value.delivery_date = null;
       form.value.delivery_time = null;
@@ -462,6 +464,7 @@ const _updateTime = () => {
       (currentHour > endHour || (currentHour === endHour && currentMinute >= endMinute))
         // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
         ) {
+          isPreValid.value = false;
           isClosed.value = true;
         } else {
           if(currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)){
@@ -475,6 +478,7 @@ const _updateTime = () => {
             if(_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)){
               isClosed.value = true;
             }else{
+              isPreValid.value = false;
               branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
             }
           }
@@ -482,6 +486,7 @@ const _updateTime = () => {
   } else {
     isClosed.value = false;
     branchStart.value = branchStartBackup.value;
+    isPreValid.value = false;
 
     let menuType;
     let currentDate = new Date();
@@ -489,7 +494,9 @@ const _updateTime = () => {
     startTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
     let endTime = new Date(currentDate);
     endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
-    if((currentDate.getDate() !== currentDay.value) || (currentDate >= startTime && currentDate <= endTime)){
+    if(form.value.delivery_date == "" || form.value.delivery_date == null) return;
+    if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
+      isPreValid.value = true;
         menuType = "menuType=pre-order";
         if (userRole == "admin") {
           _getProducts(menuType);
@@ -589,14 +596,15 @@ const _createOrder = async () => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
     });
     let i = 0;
-    product.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
-      formData.append(`products[${index}][extra_flavors][${ext_index}]`, extra);
-      i++;
-    }); 
-    product.flavor?.filter(flavor => flavor !== "").forEach((flavor, flv_index) => {
-      formData.append(`products[${index}][extra_flavors][${flv_index}]`, flavor);
+    if(product.hasOwnProperty("extra")){
+      product?.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
+        formData.append(`products[${index}][extra_flavors][${i}]`, extra);
       i++;
     });
+    }
+    if(product.hasOwnProperty("flavor")){
+      formData.append(`products[${index}][extra_flavors][${i}]`, product.flavor);
+    }
   });
 
       if (imageErrors.value.length > 0)
@@ -680,10 +688,11 @@ const addImage = (product) => {
 };
 
 const addExtraFlavors = (product) => {
-  ExtraFlavorsDialog.value = true;
   currentProduct.value = product.id;
-  form.value.extra = form.value.products.find(product => product.product_id == product.id)?.extras.map(extra => extra.id);
-  form.value.flavor = form.value.products.find(product => product.product_id == product.id)?.flavors.map(flavor => flavor.id);
+  const cartProduct = form.value.products.find(product => product.product_id == currentProduct.value);
+  if(cartProduct.hasOwnProperty("flavor")) form.value.flavor = form.value.products.find(product => product.product_id == currentProduct.value)?.flavor;
+  if(cartProduct.hasOwnProperty("extra")) form.value.extra = form.value.products.find(product => product.product_id == currentProduct.value)?.extra;
+  ExtraFlavorsDialog.value = true;
 }
 
 const addNote = (product) => {
@@ -902,9 +911,8 @@ onMounted(() => {
 
       <VCard title="Additional Options">
         <VCardText>
-          <VRow>
-            <VCol>
-                <VSelect
+          <VRow v-if="currentProduct">
+                <AppCombobox
                   prepend-inner-icon="tabler-building-store"
                   placeholder="Flavor"
                   :label="$t('Flavor')"
@@ -916,8 +924,6 @@ onMounted(() => {
                   :return-object="false"
                   class="flex-grow-1 my-1 mx-2"
                 />
-            </VCol>
-            <VCol>
               <VSelect
                 prepend-inner-icon="tabler-package"
                 v-model="form.extra"
@@ -930,7 +936,6 @@ onMounted(() => {
                 class="flex-grow-1 my-1 mx-2"
                 multiple
               />
-            </VCol>
           </VRow>
         </VCardText>
 
@@ -1215,6 +1220,7 @@ onMounted(() => {
                   @add-image="addImage"
                   @add-note="addNote"
                   @add-extra-flavors="addExtraFlavors"
+                  :isPreValid="isPreValid"
                 />
               </VRow>
             </VCol>

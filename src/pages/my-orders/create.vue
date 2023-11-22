@@ -47,6 +47,7 @@ const customerAddresses = ref([]);
 const selectedAddress = ref(0);
 const vCode = ref("");
 const discountRate = ref("");
+const isPreValid = ref(false);
 const discountType = ref("");
 const newTotal = ref(0);
 const imageDialog = ref(false);
@@ -80,8 +81,8 @@ const form = ref({
   branch_id: null,
   v_code: "",
   employee_code: "",
-  extra: '',
-  flavor: '',
+  extra: null,
+  flavor: null,
 });
 
 const _getServiceCost = () => {
@@ -243,6 +244,7 @@ const addProduct = () => {
 const _updateBranches = () => {
   const date = new Date();
   form.value.delivery_time = null;
+  isPreValid.value = false;
   if (form.value.is_pickup === false) {
     form.value.delivery_date = null;
     form.value.delivery_time = null;
@@ -333,6 +335,7 @@ const _updateTime = () => {
       // (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute))
     ) {
       isClosed.value = true;
+      isPreValid.value = false;
     } else {
       if (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)) {
         branchStart.value = branchStartBackup.value;
@@ -344,23 +347,28 @@ const _updateTime = () => {
         const [_endHour, _endMinute] = branchEnd.value.split(':')?.map(Number);
         if (_currentHour > _endHour || (_currentHour === _endHour && _currentMinute >= _endMinute)) {
           isClosed.value = true;
+          isPreValid.value = false;
         } else {
-          branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+          isPreValid.value = false;
+           branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
         }
       }
     }
   } else {
     isClosed.value = false;
     branchStart.value = branchStartBackup.value;
-
+    isPreValid.value = false;
     let menuType;
-    let currentDate = new Date();
+    let currentDate = new Date(currentDay.value);
     let startTime = new Date(currentDate);
     startTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
     let endTime = new Date(currentDate);
     endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
-    if((currentDate.getDate() !== currentDay.value) || (currentDate >= startTime && currentDate <= endTime)){
+    if(form.value.delivery_date == "" || form.value.delivery_date == null) return;
+    if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
+        console.log("wtf");  
         menuType = "menuType=pre-order";
+        isPreValid.value = true;
         _getProducts(menuType);
     }
   }
@@ -448,15 +456,17 @@ const _createOrder = async () => {
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
     });
+    console.log(product)
     let i = 0;
-    product.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
-      formData.append(`products[${index}][extra_flavors][${ext_index}]`, extra);
-      i++;
-    }); 
-    product.flavor?.filter(flavor => flavor !== "").forEach((flavor, flv_index) => {
-      formData.append(`products[${index}][extra_flavors][${flv_index}]`, flavor);
+    if(product.hasOwnProperty("extra")){
+      product?.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
+        formData.append(`products[${index}][extra_flavors][${i}]`, extra);
       i++;
     });
+    }
+    if(product.hasOwnProperty("flavor")){
+      formData.append(`products[${index}][extra_flavors][${i}]`, product.flavor);
+    }
   });
 
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
@@ -473,7 +483,7 @@ const _createOrder = async () => {
       try {
         await createOrder(formData);
         toast.success("Order created successfully");
-        router.push({ name: "orders" });
+        router.push({ name: "my-orders" });
         loading.value = false;
       } catch (err) {
         loading.value = false;
@@ -523,10 +533,11 @@ const addNote = (product) => {
 };
 
 const addExtraFlavors = (product) => {
-  ExtraFlavorsDialog.value = true;
   currentProduct.value = product.id;
-  form.value.extra = form.value.products.find(product => product.product_id == product.id)?.extras.map(extra => extra.id);
-  form.value.flavor = form.value.products.find(product => product.product_id == product.id)?.flavors.map(flavor => flavor.id);
+  const cartProduct = form.value.products.find(product => product.product_id == currentProduct.value);
+  if(cartProduct.hasOwnProperty("flavor")) form.value.flavor = form.value.products.find(product => product.product_id == currentProduct.value)?.flavor;
+  if(cartProduct.hasOwnProperty("extra")) form.value.extra = form.value.products.find(product => product.product_id == currentProduct.value)?.extra;
+  ExtraFlavorsDialog.value = true;
 }
 
 const addFile = async (file) => {
@@ -710,7 +721,6 @@ onMounted(() => {
       <VCard title="Additional Options">
         <VCardText>
           <VRow v-if="currentProduct">
-            <VCol>
                 <VSelect
                   prepend-inner-icon="tabler-building-store"
                   placeholder="Flavor"
@@ -723,8 +733,6 @@ onMounted(() => {
                   :return-object="false"
                   class="flex-grow-1 my-1 mx-2"
                 />
-            </VCol>
-            <VCol>
               <VSelect
                 prepend-inner-icon="tabler-package"
                 v-model="form.extra"
@@ -737,7 +745,6 @@ onMounted(() => {
                 class="flex-grow-1 my-1 mx-2"
                 multiple
               />
-            </VCol>
           </VRow>
         </VCardText>
 
@@ -846,7 +853,7 @@ onMounted(() => {
               </VRow>
               <VRow align="center">
                 <OrderProducts :items="orderProducts" v-if="orderProducts.length" @delete="deleteProduct"
-                  @add-image="addImage" @add-note="addNote" @add-extra-flavors="addExtraFlavors" />
+                  @add-image="addImage" @add-note="addNote" @add-extra-flavors="addExtraFlavors" :isPreValid="isPreValid"/>
               </VRow>
             </VCol>
           </VCol>
