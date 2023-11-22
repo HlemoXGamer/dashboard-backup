@@ -1,0 +1,1 @@
+import{bb as e,ba as r}from"./index-2553232c.js";let{get:s,show:u,update:o,create:p,remove:c}=e("/restaurant-apis/products");function d(t){return r.post("/restaurant-apis/update/products",t)}export{s as g,d as u};
