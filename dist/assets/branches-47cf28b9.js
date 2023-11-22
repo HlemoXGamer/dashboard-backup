@@ -1,0 +1,1 @@
+import{bc as s,bb as r}from"./index-ac936590.js";let{get:c,show:a,update:o,create:n,remove:i}=s("/branches");function u(){return r.get("/branch/service-cost")}function b(e){return r.post("/branch_service",e)}function g(e){return r.get(`/product-history?branchId=${e}`)}export{c as a,a as b,n as c,g as d,u as g,i as r,b as s,o as u};

@@ -1,1 +1,0 @@
-import{bb as s,ba as e}from"./index-581c2083.js";let{get:a,show:c,update:o,create:n,remove:i}=s("/branches");function u(){return e.get("/branch/service-cost")}function b(r){return e.post("/branch_service",r)}function g(){return e.get("/product-history")}export{a,c as b,n as c,g as d,u as g,i as r,b as s,o as u};
