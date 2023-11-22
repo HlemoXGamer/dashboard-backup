@@ -1,0 +1,1 @@
+import{bb as a,ba as r}from"./index-36d8cfe3.js";let{get:t,show:o,update:c,create:u,remove:g}=a("/categories");function i(e){return r.post("/categories/sorted_category",e)}export{c as a,u as c,t as g,g as r,o as s,i as u};

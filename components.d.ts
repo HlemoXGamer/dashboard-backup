@@ -54,7 +54,6 @@ declare module '@vue/runtime-core' {
     EmployeesTable: typeof import('./src/components/EmployeesTable.vue')['default']
     ExtraAndFlavorsTable: typeof import('./src/components/ExtraAndFlavorsTable.vue')['default']
     FinancesTable: typeof import('./src/components/FinancesTable.vue')['default']
-    FlavorsExtras: typeof import('./src/components/FlavorsExtras.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
     LayoutsReportsTable: typeof import('./src/components/LayoutsReportsTable.vue')['default']
     LogisticsAddressDetails: typeof import('./src/components/logistic/orders/LogisticsAddressDetails.vue')['default']
