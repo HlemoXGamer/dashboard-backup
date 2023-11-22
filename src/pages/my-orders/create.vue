@@ -58,6 +58,7 @@ const branchStart = ref(null);
 const branchEnd = ref(null);
 const isClosed = ref(false);
 const branchStartBackup = ref(null);
+const ExtraFlavorsDialog = ref(false);
 const dateKey = ref(1);
 const form = ref({
   is_pickup: true,
@@ -79,6 +80,8 @@ const form = ref({
   branch_id: null,
   v_code: "",
   employee_code: "",
+  extra: '',
+  flavor: '',
 });
 
 const _getServiceCost = () => {
@@ -95,9 +98,9 @@ const _getAreas = () => {
   });
 };
 
-const _getProducts = () => {
+const _getProducts = (params) => {
   productsLoading.value = true;
-  getProducts().then(({ data, meta }) => {
+  getProducts(params).then(({ data, meta }) => {
     products.value = data.data;
     productsLoading.value = false;
   });
@@ -349,6 +352,17 @@ const _updateTime = () => {
   } else {
     isClosed.value = false;
     branchStart.value = branchStartBackup.value;
+
+    let menuType;
+    let currentDate = new Date();
+    let startTime = new Date(currentDate);
+    startTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
+    let endTime = new Date(currentDate);
+    endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
+    if((currentDate.getDate() !== currentDay.value) || (currentDate >= startTime && currentDate <= endTime)){
+        menuType = "menuType=pre-order";
+        _getProducts(menuType);
+    }
   }
 
   timeKey.value += 1;
@@ -434,6 +448,15 @@ const _createOrder = async () => {
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
     });
+    let i = 0;
+    product.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
+      formData.append(`products[${index}][extra_flavors][${ext_index}]`, extra);
+      i++;
+    }); 
+    product.flavor?.filter(flavor => flavor !== "").forEach((flavor, flv_index) => {
+      formData.append(`products[${index}][extra_flavors][${flv_index}]`, flavor);
+      i++;
+    });
   });
 
   refVForm.value?.validate().then(async ({ valid: isValid }) => {
@@ -450,7 +473,7 @@ const _createOrder = async () => {
       try {
         await createOrder(formData);
         toast.success("Order created successfully");
-        router.back();
+        router.push({ name: "orders" });
         loading.value = false;
       } catch (err) {
         loading.value = false;
@@ -498,6 +521,13 @@ const addNote = (product) => {
   noteDialog.value = true;
   currentProduct.value = product;
 };
+
+const addExtraFlavors = (product) => {
+  ExtraFlavorsDialog.value = true;
+  currentProduct.value = product.id;
+  form.value.extra = form.value.products.find(product => product.product_id == product.id)?.extras.map(extra => extra.id);
+  form.value.flavor = form.value.products.find(product => product.product_id == product.id)?.flavors.map(flavor => flavor.id);
+}
 
 const addFile = async (file) => {
   let orderProduct = orderProducts.value.find(
@@ -549,6 +579,26 @@ const deleteImage = (image) => {
   }
   product.images.splice(product.images.indexOf(image), 1);
 };
+
+const addExtrasFlavors = () => {
+  let product = form.value.products.find(
+    (product) => product.product_id == currentProduct.value,
+  );
+
+  product.extra = form.value.extra;
+  product.flavor = form.value.flavor;
+
+  ExtraFlavorsDialog.value = false
+}
+
+const currentProductExtras = computed(() => {
+  return products.value.find(product => product.id == currentProduct.value).extras;
+})
+
+const currentProductFlavors = computed(() => {
+  return products.value.find(product => product.id == currentProduct.value).flavors;
+})
+
 const currentDay = ref(new Date().toISOString());
 onMounted(() => {
   if (userRole == "agent") {
@@ -654,6 +704,49 @@ onMounted(() => {
     </VCard>
   </VDialog> -->
 
+  <VDialog v-model="ExtraFlavorsDialog" persistent class="v-dialog-sm">
+      <DialogCloseBtn @click="ExtraFlavorsDialog = false" />
+
+      <VCard title="Additional Options">
+        <VCardText>
+          <VRow v-if="currentProduct">
+            <VCol>
+                <VSelect
+                  prepend-inner-icon="tabler-building-store"
+                  placeholder="Flavor"
+                  :label="$t('Flavor')"
+                  v-model="form.flavor"
+                  :items="products.find(product => product.id == currentProduct).flavors"
+                  item-value="id"
+                  item-title="name"
+                  variant="outlined"
+                  :return-object="false"
+                  class="flex-grow-1 my-1 mx-2"
+                />
+            </VCol>
+            <VCol>
+              <VSelect
+                prepend-inner-icon="tabler-package"
+                v-model="form.extra"
+                item-title="name"
+                :items="products.find(product => product.id == currentProduct).extras"
+                item-value="id"
+                variant="outlined"
+                :label="$t('Extra')"
+                :return-object="false"
+                class="flex-grow-1 my-1 mx-2"
+                multiple
+              />
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VCardText class="d-flex justify-end gap-3 flex-wrap">
+          <VBtn @click="addExtrasFlavors()"> Confirm </VBtn>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
     <VRow class="mt-4 px-2" justify="space-around">
       <VForm ref="refVForm" @submit.prevent="_createOrder" class="w-100 d-flex">
         <VCol class="pt-0" :cols="$vuetify.display.smAndDown ? 12 : 8">
@@ -675,76 +768,6 @@ onMounted(() => {
               </VCol>
             </VCol>
           </VForm>
-
-          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
-            <p class="text-h4 pt-3 mb-0">{{ $t('Products') }}</p>
-            <VCol>
-              <VRow justify="space-between" align="end">
-                <VCombobox prepend-inner-icon="tabler-package" :loading="productsLoading" v-model="selectedProduct"
-                  :items="products" item-title="name_en" item-value="id" style="width: 100%" variant="outlined"
-                  :label="$t('Products')" class="flex-grow-1 my-1 w-50 mx-2" />
-                <AppTextField :label="$t('Quantity')" type="number" class="flex-grow-1 mx-2 my-1 w-25"
-                  v-model="productCount"></AppTextField>
-                <VBtn prepend-icon="tabler-plus" class="flex-grow-1 mx-2 my-1"
-                  :disabled="productCount <= 0 || !selectedProduct" @click="addProduct">Add</VBtn>
-              </VRow>
-              <VRow align="center">
-                <OrderProducts :items="orderProducts" v-if="orderProducts.length" @delete="deleteProduct"
-                  @add-image="addImage" @add-note="addNote" />
-              </VRow>
-            </VCol>
-          </VCol>
-
-          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
-            <p class="text-h4 pt-3 mb-4">{{ $t('User Details') }}</p>
-            <VCol>
-              <VRow justify="space-between" align="end">
-                <AppTextField prepend-inner-icon="tabler-user" :label="$t('Name')" :rules="[requiredValidator]"
-                  :placeholder="$t('Customer Name')" class="flex-grow-1 mx-2 my-1" v-model="form.name"></AppTextField>
-                <AppTextField prepend-inner-icon="tabler-at" :label="$t('Email')" :placeholder="$t('Customer Email')"
-                  :rules="[emailValidator, requiredValidator]" class="flex-grow-1 mx-2 my-1" v-model="form.email">
-                </AppTextField>
-              </VRow>
-              <VRow justify="space-between" align="end" class="mt-6">
-                <AppTextField prepend-inner-icon="tabler-phone" :placeholder="$t('Customer Phone Number')"
-                  :label="$t('Phone Number')" :rules="[
-                    integerValidator,
-                    requiredValidator,
-                    kuwaitValidator,
-                  ]" class="flex-grow-1 mx-2 my-1" v-model="form.address_phone"></AppTextField>
-              </VRow>
-            </VCol>
-          </VCol>
-
-          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
-            <p class="text-h4 pt-3 mb-1">{{ $t('User Address') }}</p>
-            <VCol>
-              <VRow justify="space-between" align="end">
-                <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
-                  v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
-                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
-                  :label="$t('Area')" class="flex-grow-0 my-1 w-50 mx-2" @update:model-value="updateStartEndTime()" />
-                <AppTextField prepend-inner-icon="tabler-container" :label="$t('Building Number')"
-                  :rules="[requiredValidator]" :placeholder="$t('Building Number')" class="flex-grow-1 mx-2 my-1"
-                  v-model="form.address_building_no"></AppTextField>
-              </VRow>
-              <VRow justify="space-between" align="end" class="mt-6">
-                <AppTextField prepend-inner-icon="tabler-stairs" :placeholder="$t('Floor')" :label="$t('Floor')"
-                  :rules="[requiredValidator]" class="flex-grow-1 mx-2 my-1" v-model="form.address_floor"></AppTextField>
-                <AppTextField prepend-inner-icon="tabler-window" :label="$t('Apartment')" :rules="[requiredValidator]"
-                  :placeholder="$t('Apartment')" class="flex-grow-1 mx-2 my-1" v-model="form.address_apartment">
-                </AppTextField>
-              </VRow>
-              <VRow justify="space-between" align="end" class="mt-6">
-                <AppTextField prepend-inner-icon="tabler-road" :placeholder="$t('Street Name')"
-                  :rules="[requiredValidator]" :label="$t('Street Name')" class="flex-grow-1 mx-2 my-1"
-                  v-model="form.address_street_name"></AppTextField>
-                <AppTextField prepend-inner-icon="tabler-number" :rules="[requiredValidator]" :label="$t('Block Number')"
-                  :placeholder="$t('Block Number')" class="flex-grow-1 mx-2 my-1" v-model="form.block_no"></AppTextField>
-              </VRow>
-            </VCol>
-          </VCol>
-
           <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
             <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
@@ -788,19 +811,101 @@ onMounted(() => {
                 </VRow>
               </VRow>
             </VCol>
+            <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
+              <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
+              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
+              </VRow>
+            <VCol>
+              <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
+                <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">  
+                  <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
+                  v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
+                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
+                  :label="$t('Area')" class="flex-grow-1 my-1 w-100" @update:model-value="updateStartEndTime()" />
+                  </VCol>
+                  <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">
+                    <VSelect clearable prepend-inner-icon="tabler-building-store" :placeholder="$t('Select a Branch')"
+                    :rules="[requiredValidator]" :label="$t('Branch')" :loading="branchesLoading" v-model="form.branch_id"
+                    :items="availableBranches" item-value="id" item-title="name_en" style="width: 100%" variant="outlined"
+                    :disabled="!form.address_address_area || form.address_address_area == ''" @update:model-value="updateStartEndTime" class="flex-grow-1 my-1 w-100"/>
+                  </VCol>
+              </VRow>
+            </VCol>
           </VCol>
+          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
+            <p class="text-h4 pt-3 mb-0">{{ $t('Products') }}</p>
+            <VCol>
+              <VRow justify="space-between" align="end">
+                <VCombobox :disabled="!form.branch_id || (!form.delivery_date && form.is_pickup)" prepend-inner-icon="tabler-package" :loading="productsLoading" v-model="selectedProduct"
+                  :items="products" item-title="name_en" item-value="id" style="width: 100%" variant="outlined"
+                  :label="$t('Products')" class="flex-grow-1 my-1 w-50 mx-2" />
+                <AppTextField :label="$t('Quantity')" type="number" :disabled="!form.branch_id || (!String(form.delivery_date).length && form.is_pickup)" class="flex-grow-1 mx-2 my-1 w-25"
+                  v-model="productCount"></AppTextField>
+                <VBtn prepend-icon="tabler-plus" class="flex-grow-1 mx-2 my-1"
+                  :disabled="productCount <= 0 || !selectedProduct" @click="addProduct">Add</VBtn>
+              </VRow>
+              <VRow align="center">
+                <OrderProducts :items="orderProducts" v-if="orderProducts.length" @delete="deleteProduct"
+                  @add-image="addImage" @add-note="addNote" @add-extra-flavors="addExtraFlavors" />
+              </VRow>
+            </VCol>
+          </VCol>
+
+          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
+            <p class="text-h4 pt-3 mb-4">{{ $t('User Details') }}</p>
+            <VCol>
+              <VRow justify="space-between" align="end">
+                <AppTextField prepend-inner-icon="tabler-user" :label="$t('Name')" :rules="[requiredValidator]"
+                  :placeholder="$t('Customer Name')" class="flex-grow-1 mx-2 my-1" v-model="form.name"></AppTextField>
+                <AppTextField prepend-inner-icon="tabler-at" :label="$t('Email')" :placeholder="$t('Customer Email')"
+                  :rules="[emailValidator, requiredValidator]" class="flex-grow-1 mx-2 my-1" v-model="form.email">
+                </AppTextField>
+              </VRow>
+              <VRow justify="space-between" align="end" class="mt-6">
+                <AppTextField prepend-inner-icon="tabler-phone" :placeholder="$t('Customer Phone Number')"
+                  :label="$t('Phone Number')" :rules="[
+                    integerValidator,
+                    requiredValidator,
+                    kuwaitValidator,
+                  ]" class="flex-grow-1 mx-2 my-1" v-model="form.address_phone"></AppTextField>
+              </VRow>
+            </VCol>
+          </VCol>
+
+          <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
+            <p class="text-h4 pt-3 mb-1">{{ $t('User Address') }}</p>
+            <VCol>
+              <VRow justify="space-between" align="end">
+                <AppTextField prepend-inner-icon="tabler-container" :label="$t('Building Number')"
+                  :rules="[requiredValidator]" :placeholder="$t('Building Number')" class="flex-grow-1 mx-2 my-1"
+                  v-model="form.address_building_no"></AppTextField>
+                  <AppTextField prepend-inner-icon="tabler-stairs" :placeholder="$t('Floor')" :label="$t('Floor')"
+                  :rules="[requiredValidator]" class="flex-grow-1 mx-2 my-1" v-model="form.address_floor"></AppTextField>
+              </VRow>
+              <VRow justify="space-between" align="end" class="mt-6">
+                <AppTextField prepend-inner-icon="tabler-window" :label="$t('Apartment')" :rules="[requiredValidator]"
+                  :placeholder="$t('Apartment')" class="flex-grow-1 mx-2 my-1" v-model="form.address_apartment">
+                </AppTextField>
+                <AppTextField prepend-inner-icon="tabler-road" :placeholder="$t('Street Name')"
+                  :rules="[requiredValidator]" :label="$t('Street Name')" class="flex-grow-1 mx-2 my-1"
+                  v-model="form.address_street_name"></AppTextField>
+              </VRow>
+              <VRow justify="space-between" align="end" class="mt-6">
+                <AppTextField prepend-inner-icon="tabler-number" :rules="[requiredValidator]" :label="$t('Block Number')"
+                  :placeholder="$t('Block Number')" class="flex-grow-1 mx-2 my-1" v-model="form.block_no"></AppTextField>
+              </VRow>
+            </VCol>
+          </VCol>
+
+          
         </VCol>
 
         <VCol class="pt-0" :cols="$vuetify.display.smAndDown ? 12 : 4">
           <VCol class="mt-16 px-5 rounded pb-10 w-100 mx-auto" style="background-color: rgb(var(--v-theme-surface))">
             <p class="text-h4 pt-3 mb-5">{{ $t('Order Summary') }}</p>
             <VCol>
-              <VRow justify="space-between" align="center">
-                <VSelect clearable prepend-inner-icon="tabler-building-store" :placeholder="$t('Select a Branch')"
-                  :rules="[requiredValidator]" :label="$t('Branch')" :loading="branchesLoading" v-model="form.branch_id"
-                  :items="availableBranches" item-value="id" item-title="name_en" style="width: 100%" variant="outlined"
-                  @update:model-value="updateStartEndTime" />
-                <AppTextarea :v-model="form.note" :label="$t('Note')" class="w-100 mt-2" />
+              <VRow justify="space-between" align="center" class="pt-0">
+                <AppTextarea :v-model="form.note" :label="$t('Note')" class="w-100 mt-0" />
               </VRow>
               <VRow class="mt-4">
                 <VCol class="w-100 px-0">

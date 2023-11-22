@@ -588,9 +588,15 @@ const _createOrder = async () => {
     product.notes?.forEach((note, nt_index) => {
       formData.append(`products[${index}][notes][${nt_index}]`, note);
     });
-    product.extra_flavors?.forEach((item, index) => {
-      formData.append(`products[${index}][extra_flavors][${index}]`, item);
-    });    
+    let i = 0;
+    product.extra?.filter(extra => extra !== "").forEach((extra, ext_index) => {
+      formData.append(`products[${index}][extra_flavors][${ext_index}]`, extra);
+      i++;
+    }); 
+    product.flavor?.filter(flavor => flavor !== "").forEach((flavor, flv_index) => {
+      formData.append(`products[${index}][extra_flavors][${flv_index}]`, flavor);
+      i++;
+    });
   });
 
       if (imageErrors.value.length > 0)
@@ -609,7 +615,7 @@ const _createOrder = async () => {
           await createRestaurantOrder(formData);
         }
         toast.success("Order created successfully");
-        router.back();
+        router.push({ name: "orders" });
         loading.value = false;
       } catch (err) {
         console.log(err);
@@ -676,6 +682,8 @@ const addImage = (product) => {
 const addExtraFlavors = (product) => {
   ExtraFlavorsDialog.value = true;
   currentProduct.value = product.id;
+  form.value.extra = form.value.products.find(product => product.product_id == product.id)?.extras.map(extra => extra.id);
+  form.value.flavor = form.value.products.find(product => product.product_id == product.id)?.flavors.map(flavor => flavor.id);
 }
 
 const addNote = (product) => {
@@ -748,7 +756,8 @@ const addExtrasFlavors = () => {
     (product) => product.product_id == currentProduct.value,
   );
 
-  product.extra_flavors = form.value.extra.concat(form.value.flavor);
+  product.extra = form.value.extra;
+  product.flavor = form.value.flavor;
 
   ExtraFlavorsDialog.value = false
 }
@@ -900,8 +909,8 @@ onMounted(() => {
                   placeholder="Flavor"
                   :label="$t('Flavor')"
                   v-model="form.flavor"
-                  :items="currentProductFlavors"
-                  item-value="name"
+                  :items="products.find(product => product.id == currentProduct).flavors"
+                  item-value="id"
                   item-title="name"
                   variant="outlined"
                   :return-object="false"
@@ -909,12 +918,12 @@ onMounted(() => {
                 />
             </VCol>
             <VCol>
-              <VCombobox
+              <VSelect
                 prepend-inner-icon="tabler-package"
                 v-model="form.extra"
                 item-title="name"
-                :items="currentProductExtras"
-                item-value="name"
+                :items="products.find(product => product.id == currentProduct).extras"
+                item-value="id"
                 variant="outlined"
                 :label="$t('Extra')"
                 :return-object="false"
@@ -1171,6 +1180,7 @@ onMounted(() => {
             <VCol>
               <VRow justify="space-between" align="end">
                 <VCombobox
+                  :disabled="!form.branch_id || (!form.delivery_date && form.is_pickup)"
                   prepend-inner-icon="tabler-package"
                   :loading="productsLoading"
                   v-model="selectedProduct"
@@ -1183,6 +1193,7 @@ onMounted(() => {
                   class="flex-grow-1 my-1 w-50 mx-2"
                 />
                 <AppTextField
+                  :disabled="!form.branch_id || (!String(form.delivery_date).length && form.is_pickup)"
                   :label="$t('Quantity')"
                   type="number"
                   class="flex-grow-1 mx-2 my-1 w-25"
