@@ -84,7 +84,7 @@ const _showBranch = async () => {
 };
 
 const _getBranchesLog = () => {
-  getBranchesLog().then(({data, meta}) => {
+  getBranchesLog(branchId).then(({data, meta}) => {
     branchesLog.value = data.data
   })
 }
