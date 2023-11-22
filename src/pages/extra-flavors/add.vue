@@ -6,7 +6,7 @@ import { useToast } from "vue-toastification";
 import { VForm } from "vuetify/components/VForm";
 const toast = useToast();
 const loading = ref(false);
-const form = ref({ name: "", type: "", price: 0, code: '', });
+const form = ref({ name: "", type: "", price: 0, code: '' });
 const refVForm = ref();
 const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 import router from "@/router";
@@ -50,6 +50,10 @@ const _addExtraFlavor = async () => {
         <VForm ref="refVForm" @submit.prevent="_addExtraFlavor">
           <VCol>
             <VRow justify="space-between" align="end">
+                 <VCol>
+                <AppTextField :rules="[requiredValidator]" style="width: 100%" class="pe-3" v-model="form.code"
+                  label="Code"></AppTextField>
+              </VCol>
               <VCol>
                 <AppTextField
                   :rules="[requiredValidator]"

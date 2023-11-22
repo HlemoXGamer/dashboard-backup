@@ -16,12 +16,13 @@ const isFlavor = computed(() => form.value.type === "flavor");
 
 const _getExtraFlavor = async () => {
   await show(extraFlavorId).then((res) => {
-    let { name, type , price } = res.data.data;
+    let { name, type , price, code } = res.data.data;
 
     form.value = {
       name,
       type,
       price,
+      code
     };
   });
 };
