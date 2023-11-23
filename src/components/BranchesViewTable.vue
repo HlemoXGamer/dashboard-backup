@@ -34,6 +34,10 @@ const props = defineProps({
     type: Array,
     default: [],
   },
+  loading: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // onMounted(() => {
@@ -45,11 +49,15 @@ const props = defineProps({
 </script>
 
 <template>
-  <VDataTable
-    :items="data"
-    :headers="headers"
-    :items-per-page="15"
-    class="pb-5 mt-0"
-    title="Branches Log"
-  />
+  <VCard rounded="lg" class="pb-0 px-0" variant="flat" :loading="loading">
+    <VCardText class="pa-0">
+        <VDataTable
+          :items="data"
+          :headers="headers"
+          :items-per-page="15"
+          class="pb-5 mt-0"
+          title="Branches Log"
+        />
+    </VCardText>
+  </VCard>
 </template>

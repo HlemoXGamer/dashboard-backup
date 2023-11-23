@@ -499,11 +499,11 @@ const _updateTime = () => {
     if(form.value.delivery_date == "" || form.value.delivery_date == null) return;
     if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
       isPreValid.value = true;
-        menuType = "menuType=pre-order";
+        menuType = "pre-order";
         if (userRole == "admin") {
-          _getProducts(menuType);
+          _getProducts(`menuType=${menuType}`);
         } else if (userRole == "restaurant") {
-          _getRestaurantProducts(menuType);
+          _getRestaurantProducts({ menuType });
         }
       }
     }
@@ -638,6 +638,7 @@ const _createOrder = async () => {
         router.push({ name: "orders" });
         loading.value = false;
       } catch (err) {
+        toast.error(err.response.data.message);
         console.log(err);
         loading.value = false;
       }
@@ -1152,7 +1153,6 @@ watch(ExtraFlavorsDialog, (newValue, oldValue) => {
           </VCol>
           <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
-              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
             </VRow>
             <VCol>
               <VRow

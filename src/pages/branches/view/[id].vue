@@ -85,18 +85,12 @@ const _showBranch = async () => {
   });
 };
 
-const _getBranchesLog = () => {
-  getBranchesLog(branchId).then(({data, meta}) => {
-    branchesLog.value = data.data;
-  })
-}
-
 const getStats = (custom) => {
     loading.value = true;
     if(custom === true){
         dateDialog.value = false;
         if(userRole == "admin"){
-            getBranchesLog(`${selectedButton.value}&branchId${branchId}${pickedDate.value !== null ? '&day=' + pickedDate.value : ''}`).then(({data}) => {
+            getBranchesLog(`${selectedButton.value}&branchId=${branchId}${pickedDate.value !== null ? '&day=' + pickedDate.value : ''}`).then(({data}) => {
                 branchesLog.value = data.data;
             }).finally(() => {
                 loading.value = false;
@@ -104,7 +98,7 @@ const getStats = (custom) => {
         }
     }else{
         if(userRole == "admin"){
-            getBranchesLog(`${selectedButton.value}&branchId${branchId}`).then(({data}) => {
+            getBranchesLog(`${selectedButton.value}&branchId=${branchId}`).then(({data}) => {
               branchesLog.value = data.data;
             }).finally(() => {
                 loading.value = false;
@@ -116,7 +110,7 @@ const getStats = (custom) => {
 const closeDateDialog = () => {
   dateDialog.value = false;
   selectedButton.value = "today";
-  pickedDate.value = ref(null);
+  pickedDate.value = null;
   getStats(true);
 }
 
@@ -146,7 +140,7 @@ onMounted(() => {
           <DialogCloseBtn @click="closeDateDialog()" />
           <VCard :title="$t('Pick a custom Date')">
             <VCardText class="d-flex ">
-              <AppDateTimePicker class="ms-1" :placeholder="$t('To')" prepend-inner-icon="tabler-calendar" v-model="pickedDate" />
+              <AppDateTimePicker class="ms-1" prepend-inner-icon="tabler-calendar" v-model="pickedDate" />
             </VCardText>
             <VCardText class="d-flex justify-end gap-3 flex-wrap">
               <VBtn @click="getStats(true)" :loading="loading" :disabled="!pickedDate">
@@ -160,19 +154,19 @@ onMounted(() => {
       <BranchesViewSummary :data="form" :cities="cities" />
       <VRow class="gap-5 pt-16 pl-3 pb-0">
         <VBtn
-        :loading="loading"
+        :disabled="loading"
           :variant="getButtonVariant('today')"
           @click="isCustom('today')"
           >Today</VBtn
         >
         <VBtn
-        :loading="loading"
+        :disabled="loading"
           :variant="getButtonVariant('yesterday')"
           @click="isCustom('yesterday')"
           >Yesterday</VBtn
         >
         <VBtn
-        :loading="loading"
+        :disabled="loading"
           :variant="getButtonVariant('custom')"
           @click="isCustom('custom')"
           >Custom</VBtn
@@ -182,8 +176,8 @@ onMounted(() => {
         class="px-5 rounded mt-10"
         style="background-color: rgb(var(--v-theme-surface))"
       >
-        <p class="text-h4 pt-3 pb-2">{{ $t("Branches Log") }}</p>
-        <BranchesViewTable :data="branchesLog" />
+        <p class="text-h4 pt-3 pb-0">{{ $t("Branches Log") }}</p>
+        <BranchesViewTable :data="branchesLog" :loading="loading" />
       </VCol>
     </VCol>
   </VRow>

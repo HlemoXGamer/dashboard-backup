@@ -495,6 +495,7 @@ const _createOrder = async () => {
         router.push({ name: "my-orders" });
         loading.value = false;
       } catch (err) {
+        toast.error(err.response.data.message);
         loading.value = false;
       }
     }
@@ -854,7 +855,6 @@ onMounted(() => {
             </VCol>
             <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
-              <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200" prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
               </VRow>
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
