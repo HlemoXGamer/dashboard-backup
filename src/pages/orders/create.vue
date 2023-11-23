@@ -79,7 +79,6 @@ const branchEnd = ref(null);
 const isClosed = ref(false);
 const branchStartBackup = ref(null);
 const dateKey = ref(1);
-const isBranchSelected = false;
 const isPreValid = ref(false);
 const form = ref({
   is_pickup: true,
@@ -103,6 +102,9 @@ const form = ref({
   employee_code: "",
   extra: null,
   flavor: null,
+});
+const isBranchSelected = computed(() => {
+  return form.value.branch_id !== null;
 });
 
 const imageErrors = ref([]);
@@ -157,8 +159,8 @@ const _getRestaurantProducts = (params) => {
   productsLoading.value = true;
   getRestaurantProducts(params).then(({ data, meta }) => {
     products.value = data.data;
-    productsLoading.value = false;
   });
+  productsLoading.value = false;
 };
 
 const _getCustomer = () => {
@@ -828,6 +830,12 @@ onMounted(() => {
   })
 });
 
+watch(ExtraFlavorsDialog, (newValue, oldValue) => {
+      console.log(`Value changed from ${oldValue} to ${newValue}`);
+      // Add your custom logic here for when inputValue changes
+
+});
+
 </script>
 <template>
   <div>
@@ -936,48 +944,48 @@ onMounted(() => {
         </VCardText>
       </VCard>
     </VDialog>
-    <VDialog v-model="ExtraFlavorsDialog" persistent class="v-dialog-sm">
-      <DialogCloseBtn @click="ExtraFlavorsDialog = false" />
-
-      <VCard title="Additional Options">
-        <VCardText>
-          <VRow v-if="currentProduct">
-            <VCol cols="6">
-                <VCombobox
-                  prepend-inner-icon="tabler-building-store"
-                  placeholder="Flavor"
-                  :label="$t('Flavor')"
-                  v-model="form.flavor"
-                  :items="products.find(product => product.id == currentProduct).flavors"
-                  item-value="id"
+    <div>
+      <VDialog v-model="ExtraFlavorsDialog" persistent class="v-dialog-sm">
+        <DialogCloseBtn @click="ExtraFlavorsDialog = false" />
+        <VCard title="Additional Options">
+          <VCardText>
+            <VRow v-if="currentProduct">
+              <VCol cols="6">
+                  <VCombobox
+                    prepend-inner-icon="tabler-building-store"
+                    placeholder="Flavor"
+                    :label="$t('Flavor')"
+                    v-model="form.flavor"
+                    :items="currentProductExtras"
+                    item-value="id"
+                    item-title="name"
+                    variant="outlined"
+                    :return-object="false"
+                    class="flex-grow-1 my-1 mx-2"
+                  />
+                  </VCol>
+                  <VCol cols="6">
+                <VSelect
+                  prepend-inner-icon="tabler-package"
+                  v-model="form.extra"
                   item-title="name"
+                  :items="currentProductFlavors"
+                  item-value="id"
                   variant="outlined"
+                  :label="$t('Extra')"
                   :return-object="false"
                   class="flex-grow-1 my-1 mx-2"
+                  multiple
                 />
                 </VCol>
-                <VCol cols="6">
-              <VSelect
-                prepend-inner-icon="tabler-package"
-                v-model="form.extra"
-                item-title="name"
-                :items="products.find(product => product.id == currentProduct).extras"
-                item-value="id"
-                variant="outlined"
-                :label="$t('Extra')"
-                :return-object="false"
-                class="flex-grow-1 my-1 mx-2"
-                multiple
-              />
-              </VCol>
-          </VRow>
-        </VCardText>
-
-        <VCardText class="d-flex justify-end gap-3 flex-wrap">
-          <VBtn @click="addExtrasFlavors()"> Confirm </VBtn>
-        </VCardText>
-      </VCard>
-    </VDialog>
+            </VRow>
+          </VCardText>
+          <VCardText class="d-flex justify-end gap-3 flex-wrap">
+            <VBtn @click="addExtrasFlavors()"> Confirm </VBtn>
+          </VCardText>
+        </VCard>
+      </VDialog>
+    </div>
 
     <VRow class="mt-4 px-2" justify="space-around">
       <VForm ref="refVForm" @submit.prevent="_createOrder" class="w-100 d-flex">
@@ -1085,7 +1093,7 @@ onMounted(() => {
                   />
                   <AppDateTimePicker
                     :rules="[requiredValidator]"
-                    :disabled="!form.is_pickup || isClosed || isBranchSelected"
+                    :disabled="!form.is_pickup || isClosed || !isBranchSelected"
                     prepend-inner-icon="tabler-clock"
                     v-model="form.delivery_time"
                     :placeholder="$t('Enter your time')"
