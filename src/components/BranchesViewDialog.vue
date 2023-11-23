@@ -1,7 +1,8 @@
 <script setup>
 const pickedDate = ref(null);
+const emits = defineEmits(['exit']);
 const confirm = () => {
-    emit('exit', true, pickedDate.value);
+    emits('exit', true, pickedDate.value);
     pickedDate.value = null;
 }
 </script>
