@@ -85,12 +85,12 @@ const _showBranch = async () => {
   });
 };
 
-const getStats = (custom) => {
+const getStats = (custom, pickedDate) => {
     loading.value = true;
     if(custom === true){
-        dateDialog.value = false;
+      dateDialog.value = false;
         if(userRole == "admin"){
-            getBranchesLog(`${selectedButton.value}&branchId=${branchId}${pickedDate.value !== null ? '&day=' + pickedDate.value : ''}`).then(({data}) => {
+            getBranchesLog(`${selectedButton.value}&branchId=${branchId}${pickedDate !== null ? '&day=' + pickedDate : ''}`).then(({data}) => {
                 branchesLog.value = data.data;
             }).finally(() => {
                 loading.value = false;
@@ -130,25 +130,13 @@ onMounted(() => {
   if (userRole === 'admin') {
     _showBranch();
     // _getBranchesLog();  
-    getStats('today')
+    getStats(false);
   }
 });
 </script>
 <template>
   <div>
-    <VDialog v-model="dateDialog" persistent class="v-dialog-sm">
-          <DialogCloseBtn @click="closeDateDialog()" />
-          <VCard :title="$t('Pick a custom Date')">
-            <VCardText class="d-flex ">
-              <AppDateTimePicker class="ms-1" prepend-inner-icon="tabler-calendar" v-model="pickedDate" />
-            </VCardText>
-            <VCardText class="d-flex justify-end gap-3 flex-wrap">
-              <VBtn @click="getStats(true)" :loading="loading" :disabled="!pickedDate">
-                {{ $t('Pick') }}
-              </VBtn>
-            </VCardText>
-          </VCard>
-        </VDialog>
+   <BranchesViewDialog @exit="getStats" v-model="dateDialog" @close="closeDateDialog" />
   <VRow class="mt-4 px-4" justify="space-around">
     <VCol class="pt-0">
       <BranchesViewSummary :data="form" :cities="cities" />

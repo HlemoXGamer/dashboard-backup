@@ -35,6 +35,7 @@ declare module '@vue/runtime-core' {
     AreasDialog: typeof import('./src/components/AreasDialog.vue')['default']
     AreasTable: typeof import('./src/components/AreasTable.vue')['default']
     BranchesTable: typeof import('./src/components/BranchesTable.vue')['default']
+    BranchesViewDialog: typeof import('./src/components/BranchesViewDialog.vue')['default']
     BranchesViewSummary: typeof import('./src/components/BranchesViewSummary.vue')['default']
     BranchesViewTable: typeof import('./src/components/BranchesViewTable.vue')['default']
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
