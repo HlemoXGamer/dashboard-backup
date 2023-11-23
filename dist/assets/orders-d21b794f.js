@@ -1,1 +1,0 @@
-import{bb as a,ba as r}from"./index-b5d24edb.js";let{get:t,show:c,update:o,create:n,remove:u}=a("restaurant-apis/orders");function p(e){return r.post("/restaurant-apis/phone/check",e)}function h(e){return r.post("/restaurant-apis/voucher/check",e)}export{h as a,n as b,p as c,t as g,c as s};

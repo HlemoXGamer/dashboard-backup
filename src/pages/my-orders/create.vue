@@ -609,6 +609,37 @@ const currentProductFlavors = computed(() => {
   return products.value.find(product => product.id == currentProduct.value).flavors;
 })
 
+const addExtrasFlavors = () => {
+  let product = form.value.products.find(
+    (product) => product.product_id == currentProduct.value,
+  );
+  let tableOrderProduct = orderProducts.value.find(product => product.id == currentProduct.value);
+  products.value.find(item => item.id == currentProduct.value).extras.forEach(extra => {
+    if(product.hasOwnProperty("extra")){
+      if(product.extra.includes(extra.id)){
+        total.value -= extra.price
+        tableOrderProduct.total -= extra.price;
+      }
+    }
+  })
+  product.extra = form.value.extra;
+  product.flavor = form.value.flavor;
+  let extrasPrice = 0;
+  products.value.find(item => item.id == currentProduct.value).extras.forEach(extra => {
+    if(product.extra.includes(extra.id)){
+      extrasPrice += Number(extra.price) * Number(product.quantity);
+      tableOrderProduct.total += Number(extra.price) * Number(product.quantity);
+    }
+  })
+
+  total.value = total.value + extrasPrice;
+
+  ExtraFlavorsDialog.value = false;
+
+  form.value.extra = [];
+  form.value.flavor = "";
+}
+
 const currentDay = ref(new Date().toISOString());
 onMounted(() => {
   if (userRole == "agent") {
