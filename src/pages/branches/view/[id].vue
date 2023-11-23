@@ -8,8 +8,7 @@ const userRole = JSON.parse(localStorage.getItem("userData"))?.type;
 const areasData = ref([]);
 const branchesLog = ref([]);
 const dateDialog = ref(false);
-const pickedFromDate = ref(null);
-const pickedToDate = ref(null);
+const pickedDate = ref(null);
 const loading = ref(false);
 const form = ref({
   start: "",
@@ -96,10 +95,8 @@ const getStats = (custom) => {
     loading.value = true;
     if(custom === true){
         dateDialog.value = false;
-        let from = pickedFromDate.value;
-        let to = pickedToDate.value;
         if(userRole == "admin"){
-            getBranchesLog(`${selectedButton.value}&branchId${branchId}${from !== null ? '&from='+from : ''}${to !== null ? '&to='+to : ''}`).then(({data}) => {
+            getBranchesLog(`${selectedButton.value}&branchId${branchId}${pickedDate.value !== null ? '&day=' + pickedDate.value : ''}`).then(({data}) => {
                 branchesLog.value = data.data;
             }).finally(() => {
                 loading.value = false;
@@ -119,8 +116,7 @@ const getStats = (custom) => {
 const closeDateDialog = () => {
   dateDialog.value = false;
   selectedButton.value = "today";
-  pickedFromDate.value = ref(null);
-  pickedToDate.value = ref(null);
+  pickedDate.value = ref(null);
   getStats(true);
 }
 
@@ -139,7 +135,8 @@ const isCustom = (type) => {
 onMounted(() => {
   if (userRole === 'admin') {
     _showBranch();
-    _getBranchesLog()
+    // _getBranchesLog();  
+    getStats('today')
   }
 });
 </script>
@@ -149,12 +146,10 @@ onMounted(() => {
           <DialogCloseBtn @click="closeDateDialog()" />
           <VCard :title="$t('Pick a custom Date')">
             <VCardText class="d-flex ">
-              <AppDateTimePicker class="me-1" :placeholder="$t('From')" prepend-inner-icon="tabler-calendar"
-                v-model="pickedFromDate" />
-              <AppDateTimePicker class="ms-1" :placeholder="$t('To')" prepend-inner-icon="tabler-calendar" v-model="pickedToDate" />
+              <AppDateTimePicker class="ms-1" :placeholder="$t('To')" prepend-inner-icon="tabler-calendar" v-model="pickedDate" />
             </VCardText>
             <VCardText class="d-flex justify-end gap-3 flex-wrap">
-              <VBtn @click="getStats(true)" :loading="loading" :disabled="!pickedFromDate && !pickedToDate">
+              <VBtn @click="getStats(true)" :loading="loading" :disabled="!pickedDate">
                 {{ $t('Pick') }}
               </VBtn>
             </VCardText>
