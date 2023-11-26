@@ -340,7 +340,7 @@ const _updateTime = () => {
       if (currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)) {
         branchStart.value = branchStartBackup.value;
       } else {
-        const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
+        const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(46)));
         const _currentHour = _date.getHours();
         const _currentMinute = _date.getMinutes();
         const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
@@ -350,7 +350,7 @@ const _updateTime = () => {
           isPreValid.value = false;
         } else {
           isPreValid.value = false;
-           branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+           branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(46))).toTimeString().slice(0, 5);
         }
       }
     }
@@ -662,6 +662,10 @@ onMounted(() => {
     clearInterval(interval);
   })
 });
+
+const isBranchSelected = computed(() => {
+  return form.value.branch_id !== null;
+});
 </script>
 <template>
   <div>
@@ -811,19 +815,43 @@ onMounted(() => {
             </VCol>
           </VForm>
           <VCol class="mt-7 px-5 rounded pb-10" style="background-color: rgb(var(--v-theme-surface))">
-            <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
+            <VCol>
+              <VRow>
+                <VCol>
+                  <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
+              <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
+              </VRow>
+            <VCol>
+              <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
+                <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">  
+                  <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
+                  v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
+                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
+                  :label="$t('Area')" class="flex-grow-1 my-1 w-100" @update:model-value="updateStartEndTime()" />
+                  </VCol>
+                  <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">
+                    <VSelect clearable prepend-inner-icon="tabler-building-store" :placeholder="$t('Select a Branch')"
+                    :rules="[requiredValidator]" :label="$t('Branch')" :loading="branchesLoading" v-model="form.branch_id"
+                    :items="availableBranches" item-value="id" item-title="name_en" style="width: 100%" variant="outlined"
+                    :disabled="!form.address_address_area || form.address_address_area == ''" @update:model-value="updateStartEndTime" class="flex-grow-1 my-1 w-100"/>
+                  </VCol>
+              </VRow>
+            </VCol>
+                </VCol>
+              </VRow>
+              <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
               <p class="text-h4 pt-3 mb-5">{{ $t('Order Scheduling') }}</p>
               <VChip v-if="isClosed && form.is_pickup" size="large" label color="error" class="text-h6" height="200"
                 prepend-icon="tabler-info-circle">The Branch is currently Closed</VChip>
             </VRow>
-            <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
+                
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
                     @update:model-value="updateStartEndTime" />
-                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || isClosed"
+                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || isClosed || !isBranchSelected"
                     prepend-inner-icon="tabler-clock" v-model="form.delivery_time" :placeholder="$t('Enter your time')"
                     class="flex-grow-1 mx-2 my-1" :key="timeKey" :config="{
                       enableTime: true,
@@ -833,6 +861,7 @@ onMounted(() => {
                       maxTime: branchEnd,
                     }" />
                 </div>
+                
                 <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
                   <AppDateTimePicker :disabled="!form.is_pickup" prepend-inner-icon="tabler-calendar"
                     v-model="form.delivery_date" :placeholder="$t('Choose Date')" class="flex-grow-1 mx-2 my-1"
@@ -851,25 +880,6 @@ onMounted(() => {
                   <VSwitch v-model="form.is_pickup" :false-value="false" :true-value="true" :inset="false"
                     :label="$t('Schedule Order')" @update:model-value="_updateBranches" />
                 </VRow>
-              </VRow>
-            </VCol>
-            <VRow class="mx-0 my-0 py-0 px-0" align="center" justify="space-between">
-              <p class="text-h4 pt-3 mb-5">{{ $t('Area & Branch') }}</p>
-              </VRow>
-            <VCol>
-              <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
-                <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">  
-                  <VCombobox clearable prepend-inner-icon="tabler-building-community" :loading="areasLoading"
-                  v-model="form.address_address_area" :items="areas" item-value="name" item-title="name"
-                  :return-object="false" style="width: 100%" variant="outlined" :rules="[requiredValidator]"
-                  :label="$t('Area')" class="flex-grow-1 my-1 w-100" @update:model-value="updateStartEndTime()" />
-                  </VCol>
-                  <VCol cols="6" class="ma-0 py-0 pe-0 pe-2">
-                    <VSelect clearable prepend-inner-icon="tabler-building-store" :placeholder="$t('Select a Branch')"
-                    :rules="[requiredValidator]" :label="$t('Branch')" :loading="branchesLoading" v-model="form.branch_id"
-                    :items="availableBranches" item-value="id" item-title="name_en" style="width: 100%" variant="outlined"
-                    :disabled="!form.address_address_area || form.address_address_area == ''" @update:model-value="updateStartEndTime" class="flex-grow-1 my-1 w-100"/>
-                  </VCol>
               </VRow>
             </VCol>
           </VCol>
