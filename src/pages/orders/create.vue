@@ -472,7 +472,7 @@ const _updateTime = () => {
           if(currentHour < startHour || (currentHour === startHour && currentMinute < startMinute)){
             branchStart.value = branchStartBackup.value;
           }else{
-            const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40)));
+            const _date = new Date(new Date().setMinutes(new Date().getMinutes() + Number(46)));
             const _currentHour = _date.getHours();
             const _currentMinute = _date.getMinutes();
             const [_startHour, _startMinute] = branchStart.value.split(':')?.map(Number);
@@ -481,7 +481,7 @@ const _updateTime = () => {
               isClosed.value = true;
             }else{
               isPreValid.value = false;
-              branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(40))).toTimeString().slice(0, 5);
+              branchStart.value = new Date(new Date().setMinutes(new Date().getMinutes() + Number(46))).toTimeString().slice(0, 5);
             }
           }
         }
