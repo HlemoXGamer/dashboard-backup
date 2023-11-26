@@ -530,7 +530,7 @@ const deleteProduct = (product) => {
     const item = form.value.products.find(item => item.product_id == product.id);
     const itemProduct = products.value.find(item => item.id == product.id);
     itemProduct.extras.forEach(extra => {
-      if(item.extra.includes(extra.id)){
+      if(item.extra?.includes(extra.id)){
         extrasPrice += Number(extra.price);
       }
     })
