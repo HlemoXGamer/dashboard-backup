@@ -1,0 +1,1 @@
+import{bb as t,ba as e}from"./index-74fdcc91.js";let{get:o,show:a,update:u,create:c,remove:d}=t("/products");const p=r=>e.post("/products/images",r);function g(){return e.get("/products?hasExtra")}function m(r){return e.get(`/products/order_product?${r}`)}export{m as a,g as b,c,p as d,o as g,d as r,a as s,u};
