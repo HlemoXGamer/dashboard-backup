@@ -439,7 +439,23 @@ const updateStartEndTime = () => {
   // branchStart.value = new Date().toTimeString().slice(0, 5);
 
   timeKey.value += 1;
+  
+  //Handle Logic That Is isPreValid = true if we in the sameday in range of time 12:00Am to 4:55AM
+  const currentDate = new Date();
 
+  const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // will give date in YYYY-MM-DD format
+
+  let startTime = new Date(currentDate);
+  startTime.setHours(0, 0, 0, 0); // Set to 12:00 AM
+
+  let endTime = new Date(currentDate);
+  endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
+
+  if (form.value.delivery_date === formattedCurrentDate && currentDate >= startTime && currentDate <= endTime) {
+    isPreValid.value = true;
+  } else {
+    isPreValid.value = false;
+  }
   _updateTime();
 }
 
