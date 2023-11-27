@@ -54,6 +54,8 @@ declare module '@vue/runtime-core' {
     DialogCloseBtn: typeof import('./src/@core/components/DialogCloseBtn.vue')['default']
     EmployeesTable: typeof import('./src/components/EmployeesTable.vue')['default']
     ExtraAndFlavorsTable: typeof import('./src/components/ExtraAndFlavorsTable.vue')['default']
+    ExtraFlavorDialog: typeof import('./src/components/ExtraFlavorDialog.vue')['default']
+    ExtraFlavorsDialog: typeof import('./src/components/ExtraFlavorsDialog.vue')['default']
     FinancesTable: typeof import('./src/components/FinancesTable.vue')['default']
     I18n: typeof import('./src/@core/components/I18n.vue')['default']
     LayoutsReportsTable: typeof import('./src/components/LayoutsReportsTable.vue')['default']

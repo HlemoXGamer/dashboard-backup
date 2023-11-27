@@ -3,35 +3,35 @@ import { get as getBranches } from "@/apis/admin/branches";
 import { get as getDeliveries } from "@/apis/admin/deliveries";
 import { get as getAreas } from "@/apis/admin/areas";
 import { get as getAgents } from "@/apis/admin/agents"
-import { getProductsCustomizeReport } from "@/apis/admin/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportAdmin } from "@/apis/admin/products"
 import { get as getCategories } from "@/apis/admin/categories"
 import { getCustomReports } from "@/apis/admin/stats"
 import { get as getOperationBranches } from "@/apis/operation/branches";
 import { get as getOperationDeliveries } from "@/apis/operation/deliveries";
 import { get as getOperationAreas } from "@/apis/operation/areas";
 import { get as getOperationAgents } from "@/apis/operation/agents"
-import { get as getOperationProducts } from "@/apis/operation/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportOperation } from "@/apis/operation/products"
 import { get as getOperationCategories } from "@/apis/operation/categories"
 import { getCustomReports as getOperationCustomReports } from "@/apis/operation/stats"
 import { get as getLogisticBranches } from "@/apis/logistics/branches";
 import { get as getLogisticDeliveries } from "@/apis/logistics/deliveries";
 import { get as getLogisticAreas } from "@/apis/logistics/areas";
 import { get as getLogisticAgents } from "@/apis/logistics/agents"
-import { get as getLogisticProducts } from "@/apis/logistics/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportLogistic } from "@/apis/logistics/products"
 import { get as getLogisticCategories } from "@/apis/logistics/categories"
 import { getCustomReports as getLogisticCustomReports } from "@/apis/logistics/stats"
 import { get as getFinanceBranches } from "@/apis/finances/branches";
 import { get as getFinanceDeliveries } from "@/apis/finances/deliveries";
 import { get as getFinanceAreas } from "@/apis/finances/areas";
 import { get as getFinanceAgents } from "@/apis/finances/agents"
-import { get as getFinanceProducts } from "@/apis/finances/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportFinance } from "@/apis/finances/products"
 import { get as getFinanceCategories } from "@/apis/finances/categories"
 import { getCustomReports as getFinanceCustomReports } from "@/apis/finances/stats"
 import { get as getAgentBranches } from "@/apis/agent/branches";
 import { get as getAgentDeliveries } from "@/apis/agent/deliveries";
 import { get as getAgentAreas } from "@/apis/agent/areas";
 import { get as getAgentAgents } from "@/apis/agent/agents"
-import { get as getAgentProducts } from "@/apis/agent/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportAgent } from "@/apis/agent/products"
 import { get as getAgentCategories } from "@/apis/agent/categories"
 import { getCustomReports as getAgentCustomReports } from "@/apis/agent/stats"
 import axiosIns from "@/plugins/axios";
@@ -377,7 +377,7 @@ onMounted(() => {
     _getBranches(getBranches);
     _getDeliveries(getDeliveries);
     _getAgents(getAgents);
-    _getProducts(getProductsCustomizeReport);
+    _getProducts(getProductsCustomizeReportAdmin);
     _getCategories(getCategories);
   }else if(userRole == "finance"){
     _getReports(getFinanceCustomReports);
@@ -385,7 +385,7 @@ onMounted(() => {
     _getBranches(getFinanceBranches);
     _getDeliveries(getFinanceDeliveries);
     _getAgents(getFinanceAgents);
-    _getProducts(getFinanceProducts);
+    _getProducts(getProductsCustomizeReportFinance);
     _getCategories(getFinanceCategories);
   }else if(userRole == "operation"){
     _getReports(getOperationCustomReports);
@@ -393,7 +393,7 @@ onMounted(() => {
     _getBranches(getOperationBranches);
     _getDeliveries(getOperationDeliveries);
     _getAgents(getOperationAgents);
-    _getProducts(getOperationProducts);
+    _getProducts(getProductsCustomizeReportOperation);
     _getCategories(getOperationCategories);
   }else if(userRole == "logistic"){
     _getReports(getLogisticCustomReports);
@@ -401,7 +401,7 @@ onMounted(() => {
     _getBranches(getLogisticBranches);
     _getDeliveries(getLogisticDeliveries);
     _getAgents(getLogisticAgents);
-    _getProducts(getLogisticProducts);
+    _getProducts(getProductsCustomizeReportLogistic);
     _getCategories(getLogisticCategories);
   }else if(userRole == "agent"){
     _getReports(getAgentCustomReports);
@@ -409,7 +409,7 @@ onMounted(() => {
     _getBranches(getAgentBranches);
     _getDeliveries(getAgentDeliveries);
     _getAgents(getAgentAgents);
-    _getProducts(getAgentProducts);
+    _getProducts(getProductsCustomizeReportAgent);
     _getCategories(getAgentCategories);
   }
 });
