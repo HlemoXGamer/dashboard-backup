@@ -3,7 +3,7 @@ import { get as getBranches } from "@/apis/admin/branches";
 import { get as getDeliveries } from "@/apis/admin/deliveries";
 import { get as getAreas } from "@/apis/admin/areas";
 import { get as getAgents } from "@/apis/admin/agents"
-import { get as getProducts } from "@/apis/admin/products"
+import { getProductsCustomizeReport } from "@/apis/admin/products"
 import { get as getCategories } from "@/apis/admin/categories"
 import { getCustomReports } from "@/apis/admin/stats"
 import { get as getOperationBranches } from "@/apis/operation/branches";
@@ -377,7 +377,7 @@ onMounted(() => {
     _getBranches(getBranches);
     _getDeliveries(getDeliveries);
     _getAgents(getAgents);
-    _getProducts(getProducts);
+    _getProducts(getProductsCustomizeReport);
     _getCategories(getCategories);
   }else if(userRole == "finance"){
     _getReports(getFinanceCustomReports);
