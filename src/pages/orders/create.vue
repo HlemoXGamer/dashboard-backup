@@ -835,9 +835,11 @@ watch(ExtraFlavorsDialog, (newValue, oldValue) => {
   // Add your custom logic here for when inputValue changes
 
 });
+
 const isAreaSelected = computed(() => {
   return form.value.address_address_area !== null && form.value.address_address_area !== '';
 });
+
 </script>
 <template>
   <div>
@@ -1019,7 +1021,7 @@ const isAreaSelected = computed(() => {
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup ||!isAreaSelected.value"
+                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
                     @update:model-value="updateStartEndTime" />
