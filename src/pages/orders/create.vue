@@ -81,7 +81,7 @@ const branchStartBackup = ref(null);
 const dateKey = ref(1);
 const isPreValid = ref(false);
 const form = ref({
-  is_pickup: true,
+  is_pickup: false,
   products: [],
   email: "",
   name: "",
@@ -837,7 +837,7 @@ watch(ExtraFlavorsDialog, (newValue, oldValue) => {
 });
 
 const isAreaSelected = computed(() => {
-  return form.value.address_address_area !== null && form.value.address_address_area !== '';
+  return form.value.address_address_area !== null;
 });
 
 </script>
@@ -1021,7 +1021,7 @@ const isAreaSelected = computed(() => {
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
+                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup || !isAreaSelected"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
                     @update:model-value="updateStartEndTime" />
