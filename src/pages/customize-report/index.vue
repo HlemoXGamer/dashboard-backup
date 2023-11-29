@@ -377,40 +377,30 @@ onMounted(() => {
     _getBranches(getBranches);
     _getDeliveries(getDeliveries);
     _getAgents(getAgents);
-    _getProducts(getProductsCustomizeReportAdmin);
-    _getCategories(getCategories);
   }else if(userRole == "finance"){
     _getReports(getFinanceCustomReports);
     _getAreas(getFinanceAreas);
     _getBranches(getFinanceBranches);
     _getDeliveries(getFinanceDeliveries);
     _getAgents(getFinanceAgents);
-    _getProducts(getProductsCustomizeReportFinance);
-    _getCategories(getFinanceCategories);
   }else if(userRole == "operation"){
     _getReports(getOperationCustomReports);
     _getAreas(getOperationAreas);
     _getBranches(getOperationBranches);
     _getDeliveries(getOperationDeliveries);
     _getAgents(getOperationAgents);
-    _getProducts(getProductsCustomizeReportOperation);
-    _getCategories(getOperationCategories);
   }else if(userRole == "logistic"){
     _getReports(getLogisticCustomReports);
     _getAreas(getLogisticAreas);
     _getBranches(getLogisticBranches);
     _getDeliveries(getLogisticDeliveries);
     _getAgents(getLogisticAgents);
-    _getProducts(getProductsCustomizeReportLogistic);
-    _getCategories(getLogisticCategories);
   }else if(userRole == "agent"){
     _getReports(getAgentCustomReports);
     _getAreas(getAgentAreas);
     _getBranches(getAgentBranches);
     _getDeliveries(getAgentDeliveries);
     _getAgents(getAgentAgents);
-    _getProducts(getProductsCustomizeReportAgent);
-    _getCategories(getAgentCategories);
   }
 });
 </script>
@@ -469,26 +459,6 @@ onMounted(() => {
                 <AppDateTimePicker v-model="form.to" :placeholder="$t('To')" class="mx-2 flex-grow-1"
                   :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
                 </AppDateTimePicker>
-              </VRow>
-              <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
-                justify="space-between">
-                <VCombobox prepend-inner-icon="tabler-package" v-model="form.product" multiple :items="products" item-value="id"
-                  item-title="name_en" :return-object="false" :placeholder="$t('Select a Product')" class="mx-2 flex-grow-1 products"
-                  :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
-                  <template #prepend-item>
-                    <VBtn v-if="!isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
-                      {{ $t("Select All") }}
-                    </VBtn>
-                    <VBtn v-if="isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
-                      {{ $t("Unselect All") }}
-                    </VBtn>
-                  </template>
-                </VCombobox>
-                <VCombobox prepend-inner-icon="tabler-bookmark" multiple v-model="form.category" :items="categories"
-                  item-value="id" item-title="name_en" :return-object="false" :placeholder="$t('Select a Category')"
-                  class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
-                  <AppTextField placeholder="Order Number" prepend-inner-icon="tabler-number" class="flex-grow-1" v-model="form.orderId"/>
               </VRow>
             </VCol>
             <VCol cols="12" class="mt-2 v-col-sm-12 v-col-md-2 v-col-lg-2">

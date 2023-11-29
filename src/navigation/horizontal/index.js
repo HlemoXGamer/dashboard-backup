@@ -138,6 +138,11 @@ export default [
         roles: ["admin", "operation", "finance", "logistic", "agent"],
       },
       {
+        title: "Product & Category",
+        to: { name: "product-category-report" },
+        roles: ["admin", "operation", "finance", "logistic", "agent"],
+      },
+      {
         title: "Branches & Areas",
         to: { name: "branches-areas-report" },
         roles: ["admin", "restaurant", "operation", "finance", "logistic", "agent"],
