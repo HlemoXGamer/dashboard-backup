@@ -853,6 +853,8 @@ watch(ExtraFlavorsDialog, (newValue, oldValue) => {
 });
 
 const isAreaSelected = computed(() => {
+  timeKey.value += 1;
+  dateKey.value += 1;
   return form.value.address_address_area != null && form.value.is_pickup;
 });
 
