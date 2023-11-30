@@ -1,0 +1,1 @@
+import{b6 as s,b5 as r}from"./index-ff119983.js";let{get:t,show:o,update:m,create:c,remove:p}=s("markter/products");const u=e=>r.post("/markter/products/images",e);export{u as a,c,t as g,p as r,o as s,m as u};

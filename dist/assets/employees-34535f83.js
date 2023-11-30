@@ -1,1 +1,0 @@
-import{b6 as s,b5 as a}from"./index-cb78d435.js";let{get:o,show:c,update:t,create:p,remove:m}=s("/employee");function u(e){return a.post("/employee/check",e)}export{p as a,u as c,o as g,m as r,c as s,t as u};

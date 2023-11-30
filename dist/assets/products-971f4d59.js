@@ -1,0 +1,1 @@
+import{b6 as t,b5 as e}from"./index-ff119983.js";let{get:o,show:a,update:u,create:c,remove:d}=t("/products");const p=r=>e.post("/products/images",r);function g(){return e.get("/products?hasExtra")}function m(r){return e.get(`/products/order_product?${r}`)}export{g as a,m as b,c,p as d,o as g,d as r,a as s,u};
