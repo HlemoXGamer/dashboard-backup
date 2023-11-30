@@ -1040,7 +1040,7 @@ const isAreaSelected = computed(() => {
             <VCol>
               <VRow justify="space-between" align="center" :class="!$vuetify.display.smAndDown ? 'flex-nowrap' : ''">
                 <div v-if="form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!isAreaSelected"
+                  <AppDateTimePicker :rules="[requiredValidator]" :disabled="!form.is_pickup"
                     prepend-inner-icon="tabler-calendar" v-model="form.delivery_date" :placeholder="$t('Choose Date')"
                     class="flex-grow-1 mx-2 my-1" :config="{ minDate: today }" :key="dateKey"
                     @update:model-value="updateStartEndTime" />
@@ -1056,7 +1056,7 @@ const isAreaSelected = computed(() => {
                     }" />
                 </div>
                 <div v-if="!form.is_pickup" class="w-100 flex-grow-1 d-flex">
-                  <AppDateTimePicker :disabled="!isAreaSelected" prepend-inner-icon="tabler-calendar"
+                  <AppDateTimePicker :disabled="!form.is_pickup" prepend-inner-icon="tabler-calendar"
                     v-model="form.delivery_date" :placeholder="t('Choose Date')" class="flex-grow-1 mx-2 my-1"
                     :config="{ minDate: today }" :key="dateKey" @update:model-value="updateStartEndTime" />
                   <AppDateTimePicker :disabled="!form.is_pickup || isClosed" prepend-inner-icon="tabler-clock"
