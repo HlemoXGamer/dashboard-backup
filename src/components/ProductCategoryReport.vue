@@ -50,7 +50,7 @@ const headers = computed(() =>
       {
         title: t("Created By"),
         sortable: false,
-        key: "creator",
+        key: "created_by",
         width: '200px'
       }
     ]
