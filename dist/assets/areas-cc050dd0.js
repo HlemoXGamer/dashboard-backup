@@ -1,1 +1,0 @@
-import{b6 as a,b5 as r}from"./index-0bb0cc22.js";let{get:t,show:o,update:c,create:u,remove:n}=a("/areas");function g(e){return r.get("/branch/areas",{params:e})}export{g as a,u as c,t as g,n as r,o as s,c as u};
