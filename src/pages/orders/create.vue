@@ -516,11 +516,12 @@ const _updateTime = () => {
     if ((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)) {
       isPreValid.value = true;
       menuType = "pre-order";
-      if (userRole == "admin") {
-        _getProducts(`menuType=${menuType}`);
-      } else if (userRole == "restaurant") {
-        _getRestaurantProducts({ menuType });
-      }
+      // delete the 2 requests onchange daypicker REQUIRED TASK
+      // if (userRole == "admin") {
+      //   _getProducts(`menuType=${menuType}`);
+      // } else if (userRole == "restaurant") {
+      //   _getRestaurantProducts({ menuType });
+      // }
     }
   }
 
