@@ -44,7 +44,7 @@ const headers = computed(() =>[
   {
     title: t('Estimtaion Time'),
     key: 'est_time',
-    sortable: false,
+    sortable: true,
     align: "center"
   },
   {

@@ -63,7 +63,7 @@ const _addVoucher = async () => {
       loading.value = true;
       try {
         if (form.value.v_type_name == "free_delivevery") {
-          form.value.v_amount = "";
+          form.value.v_amount = 0.5;
           noAmount.value = true;
         }
         form.value.v_type = discountTypes.value.filter(
