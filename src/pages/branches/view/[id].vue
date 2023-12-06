@@ -14,6 +14,8 @@ const deliveryNowActive = ref(false);
 const laterTodayActive = ref(false);
 const preOrderActive = ref(false);
 
+const selectedDate = ref(new Date().toISOString().substr(0, 10)); // default to today's date
+
 const areasData = ref([]);
 const branchesLog = ref([]);
 const dateDialog = ref(false);
@@ -38,7 +40,8 @@ const form = ref({
   working_days: [],
   is_active: 0,
   time_slots: [],
-  order_types: []
+  order_types: [],
+  delivery_types: []
 });
 
 const selectedButton = ref("today");
@@ -124,6 +127,12 @@ const isCustom = (type) => {
   }, 100)
 }
 
+watch(selectedDate, (newDate) => {
+  // Filter the time slots based on the selected date
+  const filteredSlots = form.value.time_slots.find(slot => slot.day === newDate)?.slots || [];
+  form.value.slotsForSelectedDay = filteredSlots;
+});
+
 onMounted(() => {
   if (userRole === 'admin') {
     _showBranch();
@@ -173,14 +182,20 @@ onMounted(() => {
                     <VSwitch v-model="orderType.status" :inset="false" :true-value="1" :false-value="0" />
                   </VCol>
                 </VRow>
-              </VCardText>  
+              </VCardText>
             </VCard>
 
             <VCard rounded="lg" class="pb-6 px-0" variant="flat">
               <VCardText>
-                <VRow>
+                <VRow style="display: flex; justify-content: space-between; align-items: center;">
                   <VCol>
                     <p class="text-h3 py-1 mb-3">Branch Slots</p>
+                  </VCol>
+                  <VCol>
+                    <AppDateTimePicker v-model="selectedDate" :config="{
+                      minDate: new Date().toISOString().substr(0, 10),
+                      maxDate: new Date(new Date().setDate(new Date().getDate() + 6)).toISOString().substr(0, 10),
+                    }" />
                   </VCol>
                 </VRow>
                 <VRow>
@@ -218,7 +233,15 @@ onMounted(() => {
                     <VSwitch v-model="slot.status" :inset="false" :false-value="0" :true-value="1" />
                   </VCol>
                 </VRow>
+                <VRow class="delivery-types">
+                  <VCol v-for="deliveryType in form.delivery_types" :key="deliveryType.id" class="d-flex"
+                    style="justify-content: center; align-items: center; gap: 20px">
+                    <VBtn :disabled="!deliveryType.status">{{ deliveryType.name }}</VBtn>
+                    <VSwitch v-model="deliveryType.status" :inset="false" :true-value="1" :false-value="0" />
+                  </VCol>
+                </VRow>
               </VCardText>
+              
               <VRow>
                 <VCol class="mr-10" style="display: flex; justify-content: flex-end; align-items: center;">
                   <VBtn @click="_updateBranch">Save Changes</VBtn>
