@@ -1,1 +1,0 @@
-import{b6 as e,b5 as r}from"./index-682f2e6a.js";let{get:a,show:u,update:o,create:p,remove:c}=e("/restaurant-apis/products");function d(t){return r.post("/restaurant-apis/update/products",t)}export{a as g,d as u};

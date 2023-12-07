@@ -1,1 +1,0 @@
-import{b6 as s,b5 as r}from"./index-682f2e6a.js";let{get:t,show:c,update:o,create:n,remove:u}=s("restaurant-apis/orders");function p(e){return r.post("/restaurant-apis/phone/check",e)}function h(e){return r.post("/restaurant-apis/voucher/check",e)}export{h as a,n as b,p as c,t as g,c as s};
