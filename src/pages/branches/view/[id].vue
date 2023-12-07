@@ -195,7 +195,7 @@ onMounted(() => {
                   <VCol v-for="orderType in form.order_types" :key="orderType.id" class="d-flex"
                     style="justify-content: center; align-items: center; gap: 20px">
                     <VBtn :disabled="!orderType.status">{{ orderType.name }}</VBtn>
-                    <VSwitch v-model="orderType.status" :inset="false" :true-value="1" :false-value="0" />
+                    <VSwitch v-model="orderType.status" :inset="false" :true-value="1" :false-value="0" readonly />
                   </VCol>
                 </VRow>
               </VCardText>
@@ -229,7 +229,7 @@ onMounted(() => {
                 <!-- Iterate On Mocked Data -->
                 <VRow v-for="(slot, index) in form.slotsForSelectedDay" :key="index" class="mb-2">
                   <VCol class="text-center">
-                    <AppTextField v-model="slot.capacity" />
+                    <AppTextField v-model="slot.capacity" readonly />
                   </VCol>
                   <VCol class="text-center d-flex" style="">
                     <AppDateTimePicker :config="{
@@ -246,23 +246,17 @@ onMounted(() => {
                       :disabled="true" />
                   </VCol>
                   <VCol class="text-center d-flex" style="justify-content: center; align-items: center;">
-                    <VSwitch v-model="slot.status" :inset="false" :false-value="0" :true-value="1" />
+                    <VSwitch v-model="slot.status" :inset="false" :false-value="0" :true-value="1" readonly />
                   </VCol>
                 </VRow>
                 <VRow class="delivery-types">
                   <VCol v-for="deliveryType in form.delivery_types" :key="deliveryType.id" class="d-flex"
                     style="justify-content: center; align-items: center; gap: 20px">
                     <VBtn :disabled="!deliveryType.status">{{ deliveryType.name }}</VBtn>
-                    <VSwitch v-model="deliveryType.status" :inset="false" :true-value="1" :false-value="0" />
+                    <VSwitch v-model="deliveryType.status" :inset="false" :true-value="1" :false-value="0" readonly />
                   </VCol>
                 </VRow>
               </VCardText>
-
-              <VRow>
-                <VCol class="mr-10" style="display: flex; justify-content: flex-end; align-items: center;">
-                  <VBtn @click="_updateBranch">Save Changes</VBtn>
-                </VCol>
-              </VRow>
             </VCard>
           </VWindowItem>
         </VWindow>
