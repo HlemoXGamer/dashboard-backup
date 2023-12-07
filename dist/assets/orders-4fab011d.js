@@ -1,1 +1,0 @@
-import{b6 as s,b5 as r}from"./index-ff119983.js";let{get:a,show:c,update:o,create:n,remove:u}=s("/orders");const h=e=>r.put("assign/delivery",e);function p(e){return r.post("/phone/check",e)}function i(e){return r.post("/voucher/check",e)}function d(e){return r.post("/update-branch",e)}export{i as a,n as b,p as c,h as d,d as e,a as g,c as s,o as u};
