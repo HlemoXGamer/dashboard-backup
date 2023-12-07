@@ -59,6 +59,16 @@ const gettingReports = ref(false);
 const isFiltered = ref(false);
 const loading = ref(false);
 const currentTab = ref("reports");
+const deliveryTypes = ref([
+  {
+    title: 'Pickup',
+    value: 1,
+  },
+  {
+    title: 'Delivery',
+    value: 0,
+  }
+])
 const form = ref({
   branch: [],
   status: [],
@@ -70,7 +80,8 @@ const form = ref({
   payment: [],
   category: [],
   product: [],
-  orderId: ""
+  orderId: "",
+  delivery_type: "",
 });
 const isAllProductsSelected = computed(() => { return form.value.product.length == products.value.length });
 const statuses = ref([
@@ -284,7 +295,6 @@ const search = (filters) => {
 
 const clearFilters = () => {
   isFiltered.value = false;
-  // isAllProductsSelected.value = false;
   form.value = {
     branch: [],
     status: [],
@@ -295,7 +305,8 @@ const clearFilters = () => {
     area: [],
     payment: [],
     category: [],
-    product: []
+    product: [],
+    delivery_type: "",
   };
 
   if(userRole == "admin"){
@@ -425,6 +436,10 @@ onMounted(() => {
             <VCol cols="12" class="pe-0 v-col-sm-12 v-col-md-10 v-col-lg-10">
               <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-0 pe-0" align="center"
                 justify="space-between">
+                <VCombobox prepend-inner-icon="tabler-building-store" v-model="form.delivery_type" :items="deliveryTypes"
+                  item-title="title" :return-object="false" item-value="id" placeholder="Select a Delivery Type"
+                  class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
+                  :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
                 <VCombobox prepend-inner-icon="tabler-building-store" multiple v-model="form.branch" :items="branches"
                   :item-title="langIdentifier" :return-object="false" item-value="id" :placeholder="$t('Select a Branch')"
                   class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"

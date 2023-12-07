@@ -60,6 +60,16 @@ const gettingReports = ref(false);
 const isFiltered = ref(false);
 const loading = ref(false);
 const currentTab = ref("reports");
+const deliveryTypes = ref([
+  {
+    title: 'Pickup',
+    value: 1,
+  },
+  {
+    title: 'Delivery',
+    value: 0,
+  }
+])
 const form = ref({
   branch: [],
   status: [],
@@ -72,6 +82,7 @@ const form = ref({
   category: [],
   product: [],
   orderId: "",
+  delivery_type: ""
 });
 const isAllProductsSelected = computed(() => {
   return form.value.product.length == products.value.length;
@@ -311,6 +322,7 @@ const clearFilters = () => {
     payment: [],
     category: [],
     product: [],
+    delivery_type: ""
   };
 
   if (userRole == "admin") {
@@ -367,8 +379,7 @@ const exportExcel = () => {
   const query = new URLSearchParams(excelFilters).toString();
   axiosIns
     .get(
-      `${userRole !== "admin" ? `/${userRole}` : ""}/stats/custom?export${
-        query.length ? "&" + query : query
+      `${userRole !== "admin" ? `/${userRole}` : ""}/stats/custom?export${query.length ? "&" + query : query
       }`,
       { responseType: "arraybuffer" },
     )
@@ -457,269 +468,118 @@ onMounted(() => {
         <VTab value="items">Items</VTab>
       </VTabs>
       <VSpacer />
-      <VBtn
-        prepend-icon="tabler-upload"
-        color="success"
-        class="mr-3"
-        @click="exportExcel"
-        :loading="loading"
-        >{{ $t("Export Excel") }}</VBtn
-      >
+      <VBtn prepend-icon="tabler-upload" color="success" class="mr-3" @click="exportExcel" :loading="loading">{{
+        $t("Export Excel") }}</VBtn>
     </VRow>
 
     <VWindow v-model="currentTab">
       <VWindowItem value="items" class="py-7">
-        <VCol
-          style="background-color: rgb(var(--v-theme-surface))"
-          class="rounded pb-5"
-        >
+        <VCol style="background-color: rgb(var(--v-theme-surface))" class="rounded pb-5">
           <p class="text-h4 pt-3 pb-0 mb-3 px-3">Products And Categories</p>
           <VRow :class="{ 'flex-column': $vuetify.display.xs }">
             <VCol cols="12" class="pe-0 v-col-sm-12 v-col-md-10 v-col-lg-10">
-              <VRow
-                class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0"
-                align="center"
-                justify="space-between"
-              >
-                <VCombobox
-                  prepend-inner-icon="tabler-package"
-                  v-model="form.product"
-                  multiple
-                  :items="products"
-                  item-value="id"
-                  item-title="name_en"
-                  :return-object="false"
-                  :placeholder="$t('Select a Product')"
-                  class="mx-2 flex-grow-1 products"
-                  :class="{
+              <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
+                justify="space-between">
+                <VCombobox prepend-inner-icon="tabler-building-store" v-model="form.delivery_type" :items="deliveryTypes"
+                  item-title="title" :return-object="false" item-value="id" placeholder="Select a Delivery Type"
+                  class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs }"
+                  :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <VCombobox prepend-inner-icon="tabler-package" v-model="form.product" multiple :items="products"
+                  item-value="id" item-title="name_en" :return-object="false" :placeholder="$t('Select a Product')"
+                  class="mx-2 flex-grow-1 products" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                >
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
                   <template #prepend-item>
-                    <VBtn
-                      v-if="!isAllProductsSelected"
-                      block
-                      elevation="0"
-                      text
-                      color="transparent"
-                      @click="selectAllProducts"
-                    >
+                    <VBtn v-if="!isAllProductsSelected" block elevation="0" text color="transparent"
+                      @click="selectAllProducts">
                       {{ $t("Select All") }}
                     </VBtn>
-                    <VBtn
-                      v-if="isAllProductsSelected"
-                      block
-                      elevation="0"
-                      text
-                      color="transparent"
-                      @click="selectAllProducts"
-                    >
+                    <VBtn v-if="isAllProductsSelected" block elevation="0" text color="transparent"
+                      @click="selectAllProducts">
                       {{ $t("Unselect All") }}
                     </VBtn>
                   </template>
                 </VCombobox>
-                <VCombobox
-                  prepend-inner-icon="tabler-bookmark"
-                  multiple
-                  v-model="form.category"
-                  :items="categories"
-                  item-value="id"
-                  item-title="name_en"
-                  :return-object="false"
-                  :placeholder="$t('Select a Category')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                <VCombobox prepend-inner-icon="tabler-bookmark" multiple v-model="form.category" :items="categories"
+                  item-value="id" item-title="name_en" :return-object="false" :placeholder="$t('Select a Category')"
+                  class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <AppTextField
-                  placeholder="Order Number"
-                  prepend-inner-icon="tabler-number"
-                  class="flex-grow-1"
-                  v-model="form.orderId"
-                  :disabled="isOtherFieldsDisabled"
-                />
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <AppTextField placeholder="Order Number" prepend-inner-icon="tabler-number" class="flex-grow-1"
+                  v-model="form.orderId" :disabled="isOtherFieldsDisabled" />
               </VRow>
-              <VRow
-                class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0"
-                align="center"
-                justify="space-between"
-              >
-                <VCombobox
-                  prepend-inner-icon="tabler-user"
-                  v-model="form.agent"
-                  :disabled="isOtherFieldsDisabled"
-                  multiple
-                  :items="agents"
-                  item-value="id"
-                  item-title="name"
-                  :return-object="false"
-                  :placeholder="$t('Select an Agent')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+              <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
+                justify="space-between">
+                <VCombobox prepend-inner-icon="tabler-user" v-model="form.agent" :disabled="isOtherFieldsDisabled"
+                  multiple :items="agents" item-value="id" item-title="name" :return-object="false"
+                  :placeholder="$t('Select an Agent')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <VCombobox
-                  prepend-inner-icon="tabler-truck-delivery"
-                  multiple
-                  v-model="form.delivery"
-                  :disabled="isOtherFieldsDisabled"
-                  :items="deliveries"
-                  item-value="id"
-                  item-title="name"
-                  :return-object="false"
-                  :placeholder="$t('Select a Delivery')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <VCombobox prepend-inner-icon="tabler-truck-delivery" multiple v-model="form.delivery"
+                  :disabled="isOtherFieldsDisabled" :items="deliveries" item-value="id" item-title="name"
+                  :return-object="false" :placeholder="$t('Select a Delivery')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <AppDateTimePicker
-                  v-model="form.from"
-                  :placeholder="$t('From')"
-                  :disabled="isOtherFieldsDisabled"
-                  :key="timeKey"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <AppDateTimePicker v-model="form.from" :placeholder="$t('From')" :disabled="isOtherFieldsDisabled"
+                  :key="timeKey" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                >
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
                 </AppDateTimePicker>
-                <AppDateTimePicker
-                  v-model="form.to"
-                  :placeholder="$t('To')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
-                    'w-100 mt-3': $vuetify.display.xs,
-                    'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                  :disabled="isOtherFieldsDisabled"
-                  :key="timeKey"
-                >
+                <AppDateTimePicker v-model="form.to" :placeholder="$t('To')" class="mx-2 flex-grow-1" :class="{
+                  'w-100 mt-3': $vuetify.display.xs,
+                  'my-2': !$vuetify.display.xs,
+                }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" :disabled="isOtherFieldsDisabled"
+                  :key="timeKey">
                 </AppDateTimePicker>
               </VRow>
-              <VRow
-                class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0"
-                align="center"
-                justify="space-between"
-              >
-                <VCombobox
-                  prepend-inner-icon="tabler-building-store"
-                  multiple
-                  v-model="form.branch"
-                  :disabled="isOtherFieldsDisabled"
-                  :items="branches"
-                  :item-title="langIdentifier"
-                  :return-object="false"
-                  item-value="id"
-                  :placeholder="$t('Select a Branch')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+              <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
+                justify="space-between">
+                <VCombobox prepend-inner-icon="tabler-building-store" multiple v-model="form.branch"
+                  :disabled="isOtherFieldsDisabled" :items="branches" :item-title="langIdentifier" :return-object="false"
+                  item-value="id" :placeholder="$t('Select a Branch')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <VCombobox
-                  prepend-inner-icon="tabler-building-store"
-                  multiple
-                  v-model="form.area"
-                  :disabled="isOtherFieldsDisabled"
-                  :items="areas"
-                  item-title="name_en"
-                  :return-object="false"
-                  item-value="name_en"
-                  :placeholder="$t('Select an Area')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <VCombobox prepend-inner-icon="tabler-building-store" multiple v-model="form.area"
+                  :disabled="isOtherFieldsDisabled" :items="areas" item-title="name_en" :return-object="false"
+                  item-value="name_en" :placeholder="$t('Select an Area')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <VCombobox
-                  prepend-inner-icon="tabler-activity-heartbeat"
-                  multiple
-                  v-model="form.status"
-                  :disabled="isOtherFieldsDisabled"
-                  :items="statuses"
-                  item-title="name"
-                  item-value="value"
-                  :return-object="false"
-                  :placeholder="$t('Select a Status')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <VCombobox prepend-inner-icon="tabler-activity-heartbeat" multiple v-model="form.status"
+                  :disabled="isOtherFieldsDisabled" :items="statuses" item-title="name" item-value="value"
+                  :return-object="false" :placeholder="$t('Select a Status')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
-                <VCombobox
-                  prepend-inner-icon="tabler-activity-heartbeat"
-                  :return-object="false"
-                  multiple
-                  v-model="form.payment"
-                  :disabled="isOtherFieldsDisabled"
-                  :items="paymentMethods"
-                  item-title="name"
-                  item-value="value"
-                  :placeholder="$t('Select a Payment Method')"
-                  class="mx-2 flex-grow-1"
-                  :class="{
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
+                <VCombobox prepend-inner-icon="tabler-activity-heartbeat" :return-object="false" multiple
+                  v-model="form.payment" :disabled="isOtherFieldsDisabled" :items="paymentMethods" item-title="name"
+                  item-value="value" :placeholder="$t('Select a Payment Method')" class="mx-2 flex-grow-1" :class="{
                     'w-100 mt-3': $vuetify.display.xs,
                     'my-2': !$vuetify.display.xs,
-                  }"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''"
-                />
+                  }" :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
               </VRow>
             </VCol>
             <VCol cols="12" class="mt-2 v-col-sm-12 v-col-md-2 v-col-lg-2">
-              <VBtn
-                class="mx-0"
-                block
-                variant="tonal"
-                color="warning"
-                prepend-icon="tabler-x"
-                @click="clearFilters"
-                :disabled="gettingReports || !isFiltered"
-              >
+              <VBtn class="mx-0" block variant="tonal" color="warning" prepend-icon="tabler-x" @click="clearFilters"
+                :disabled="gettingReports || !isFiltered">
                 {{ $t("Reset") }}
               </VBtn>
-              <VBtn
-                class="mx-0 mt-5"
-                block
-                variant="tonal"
-                color="success"
-                prepend-icon="tabler-search"
-                @click="search(getFilters().filters)"
-                :disabled="!filters.length || gettingReports"
-              >
+              <VBtn class="mx-0 mt-5" block variant="tonal" color="success" prepend-icon="tabler-search"
+                @click="search(getFilters().filters)" :disabled="!filters.length || gettingReports">
                 {{ $t("Search") }}
               </VBtn>
             </VCol>
           </VRow>
 
-          <ProductCategoryReport
-            :hasProducts="hasProducts"
-            :gettingReports="gettingReports"
-            :meta="meta"
-            :reports="reports"
-            :filters="getFilters()"
-            @update-sort-by="handleUpdateSortBy"
-            @update-page-n="handlePageUpdate"
-          />
+          <ProductCategoryReport :hasProducts="hasProducts" :gettingReports="gettingReports" :meta="meta"
+            :reports="reports" :filters="getFilters()" @update-sort-by="handleUpdateSortBy"
+            @update-page-n="handlePageUpdate" />
         </VCol>
       </VWindowItem>
     </VWindow>

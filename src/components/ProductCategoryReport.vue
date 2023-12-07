@@ -52,7 +52,13 @@ const headers = computed(() =>
         sortable: false,
         key: "created_by",
         width: '200px'
-      }
+      },
+      {
+        title: t("Delivery Type"),
+        sortable: false,
+        key: "delivery_type",
+        width: '200px'
+      },
     ]
 )
 
