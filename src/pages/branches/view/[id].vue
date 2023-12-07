@@ -41,7 +41,8 @@ const form = ref({
   is_active: 0,
   time_slots: [],
   order_types: [],
-  delivery_types: []
+  delivery_types: [],
+  slotsForSelectedDay: []
 });
 
 const selectedButton = ref("today");
@@ -50,6 +51,11 @@ const getButtonVariant = computed(() => {
     return selectedButton.value === buttonType ? "elevated" : "tonal";
   };
 });
+const filterSlotsForSelectedDay = () => {
+  if (form.value.time_slots && form.value.time_slots.length > 0) {
+    form.value.slotsForSelectedDay = form.value.time_slots.filter(slot => slot.day === selectedDate.value);
+  }
+};
 const branchId = useRoute().params.id;
 const _showBranch = async () => {
   const response = await showBranch(branchId);
@@ -63,6 +69,7 @@ const _showBranch = async () => {
     code: 'Wassup',
     email: branchData.user.email,
   };
+
   getAreas()
     .then(({ data, meta }) => {
       areasData.value = data.data;
@@ -129,15 +136,24 @@ const isCustom = (type) => {
 
 watch(selectedDate, (newDate) => {
   // Filter the time slots based on the selected date
-  const filteredSlots = form.value.time_slots.find(slot => slot.day === newDate)?.slots || [];
+  const filteredSlots = form.value.time_slots.filter(slot => slot.day === newDate) || [];
   form.value.slotsForSelectedDay = filteredSlots;
 });
 
+watch(() => [form.value.time_slots, selectedDate.value], () => {
+  filterSlotsForSelectedDay();
+}, { immediate: true });
+
 onMounted(() => {
   if (userRole === 'admin') {
-    _showBranch();
+    _showBranch().then(() => {
+      // After fetching branch data, apply the filter
+      filterSlotsForSelectedDay();
+    });
     // _getBranchesLog();  
     getStats(false);
+    const filteredSlots = form.value.time_slots.filter(slot => slot.day === selectedDate) || [];
+    form.value.slotsForSelectedDay = filteredSlots;
   }
 });
 
@@ -211,7 +227,7 @@ onMounted(() => {
                 </VRow>
 
                 <!-- Iterate On Mocked Data -->
-                <VRow v-for="(slot, index) in form.time_slots" :key="index" class="mb-2">
+                <VRow v-for="(slot, index) in form.slotsForSelectedDay" :key="index" class="mb-2">
                   <VCol class="text-center">
                     <AppTextField v-model="slot.capacity" />
                   </VCol>
@@ -241,7 +257,7 @@ onMounted(() => {
                   </VCol>
                 </VRow>
               </VCardText>
-              
+
               <VRow>
                 <VCol class="mr-10" style="display: flex; justify-content: flex-end; align-items: center;">
                   <VBtn @click="_updateBranch">Save Changes</VBtn>
