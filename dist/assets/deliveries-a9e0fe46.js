@@ -1,0 +1,1 @@
+import{b6 as e}from"./index-d2581156.js";let{get:t,show:o,update:a,create:s,remove:p}=e("/operation/branches"),{get:m,show:c,update:$,create:d,remove:g}=e("/operation/deliverymen");export{m as a,t as g};

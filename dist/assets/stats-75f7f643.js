@@ -1,5 +1,0 @@
-<<<<<<<< HEAD:dist/assets/stats-df5ba266.js
-import{ba as e,bb as s}from"./index-f1c459eb.js";let{get:r}=s("/stats");function n(){return e.get("/stats?yesterday")}function o(){return e.get("/stats?today")}function u(){return e.get("/stats?week")}function c(t){return e.get(`/stats/product?${t}`)}function g(t){return e.get(`/stats/export?${t}`)}function i(t){return e.get(`/stats/branchArea?type=${t}`)}function f(t){return e.get(`/stats/custom?${t}`)}function d(t){return e.get(`/stats/google-analytics?${t}`)}export{r as a,o as b,n as c,u as d,g as e,f,d as g,i as h,c as m};
-========
-import{b5 as e,b6 as s}from"./index-ad06e79a.js";let{get:r}=s("/stats");function n(){return e.get("/stats?yesterday")}function o(){return e.get("/stats?today")}function u(){return e.get("/stats?week")}function c(t){return e.get(`/stats/product?${t}`)}function g(t){return e.get(`/stats/export?${t}`)}function i(t){return e.get(`/stats/branchArea?type=${t}`)}function f(t){return e.get(`/stats/custom?${t}`)}function d(t){return e.get(`/stats/google-analytics?${t}`)}export{f as a,r as b,o as c,n as d,u as e,g as f,d as g,i as h,c as m};
->>>>>>>> master:dist/assets/stats-75f7f643.js
