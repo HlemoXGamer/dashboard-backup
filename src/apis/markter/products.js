@@ -9,3 +9,6 @@ export const removeImage = (data) =>
 export function getStatsProduct() {
   return service.get("/stats/product");
 }
+export function getProductsCustomizeReport() {
+  return service.get(`/markter/products?hasExtra`);
+}

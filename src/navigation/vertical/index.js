@@ -60,6 +60,7 @@ export default [
     ],
     roles: ["admin", "markter"],
   },
+
   {
     title: "Categories",
     to: { name: "categories" },
@@ -134,6 +135,11 @@ export default [
       {
         title: "Customize Reports",
         to: { name: "customize-report" },
+        roles: ["admin", "operation", "finance", "logistic", "agent"],
+      },
+      {
+        title: "Product & Category",
+        to: { name: "product-category-report" },
         roles: ["admin", "operation", "finance", "logistic", "agent"],
       },
       {

@@ -10,3 +10,7 @@ export function getOrderProducts(data) {
 export function getStatsProduct() {
   return service.get("/stats/product");
 }
+
+export function getProductsCustomizeReport() {
+  return service.get(`/operation/products?hasExtra`);
+}

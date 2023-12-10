@@ -31,6 +31,12 @@ const headers = computed(() => {
         sortable: false,
         key: "first_product",
       },
+      {
+        title: t("Delivery Type"),
+        sortable: false,
+        key: "delivery_type",
+        width: '200px'
+      },
     ]
   } else {
     return [
@@ -85,6 +91,12 @@ const headers = computed(() => {
         title: t("Created By"),
         sortable: false,
         key: "created_by",
+        width: '200px'
+      },
+      {
+        title: t("Delivery Type"),
+        sortable: false,
+        key: "delivery_type",
         width: '200px'
       },
     ]

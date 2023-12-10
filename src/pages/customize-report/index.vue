@@ -3,35 +3,35 @@ import { get as getBranches } from "@/apis/admin/branches";
 import { get as getDeliveries } from "@/apis/admin/deliveries";
 import { get as getAreas } from "@/apis/admin/areas";
 import { get as getAgents } from "@/apis/admin/agents"
-import { get as getProducts } from "@/apis/admin/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportAdmin } from "@/apis/admin/products"
 import { get as getCategories } from "@/apis/admin/categories"
 import { getCustomReports } from "@/apis/admin/stats"
 import { get as getOperationBranches } from "@/apis/operation/branches";
 import { get as getOperationDeliveries } from "@/apis/operation/deliveries";
 import { get as getOperationAreas } from "@/apis/operation/areas";
 import { get as getOperationAgents } from "@/apis/operation/agents"
-import { get as getOperationProducts } from "@/apis/operation/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportOperation } from "@/apis/operation/products"
 import { get as getOperationCategories } from "@/apis/operation/categories"
 import { getCustomReports as getOperationCustomReports } from "@/apis/operation/stats"
 import { get as getLogisticBranches } from "@/apis/logistics/branches";
 import { get as getLogisticDeliveries } from "@/apis/logistics/deliveries";
 import { get as getLogisticAreas } from "@/apis/logistics/areas";
 import { get as getLogisticAgents } from "@/apis/logistics/agents"
-import { get as getLogisticProducts } from "@/apis/logistics/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportLogistic } from "@/apis/logistics/products"
 import { get as getLogisticCategories } from "@/apis/logistics/categories"
 import { getCustomReports as getLogisticCustomReports } from "@/apis/logistics/stats"
 import { get as getFinanceBranches } from "@/apis/finances/branches";
 import { get as getFinanceDeliveries } from "@/apis/finances/deliveries";
 import { get as getFinanceAreas } from "@/apis/finances/areas";
 import { get as getFinanceAgents } from "@/apis/finances/agents"
-import { get as getFinanceProducts } from "@/apis/finances/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportFinance } from "@/apis/finances/products"
 import { get as getFinanceCategories } from "@/apis/finances/categories"
 import { getCustomReports as getFinanceCustomReports } from "@/apis/finances/stats"
 import { get as getAgentBranches } from "@/apis/agent/branches";
 import { get as getAgentDeliveries } from "@/apis/agent/deliveries";
 import { get as getAgentAreas } from "@/apis/agent/areas";
 import { get as getAgentAgents } from "@/apis/agent/agents"
-import { get as getAgentProducts } from "@/apis/agent/products"
+import { getProductsCustomizeReport as getProductsCustomizeReportAgent } from "@/apis/agent/products"
 import { get as getAgentCategories } from "@/apis/agent/categories"
 import { getCustomReports as getAgentCustomReports } from "@/apis/agent/stats"
 import axiosIns from "@/plugins/axios";
@@ -59,6 +59,16 @@ const gettingReports = ref(false);
 const isFiltered = ref(false);
 const loading = ref(false);
 const currentTab = ref("reports");
+const deliveryTypes = ref([
+  {
+    title: 'Pickup',
+    value: 1,
+  },
+  {
+    title: 'Delivery',
+    value: 0,
+  }
+])
 const form = ref({
   branch: [],
   status: [],
@@ -70,7 +80,8 @@ const form = ref({
   payment: [],
   category: [],
   product: [],
-  orderId: ""
+  orderId: "",
+  delivery_type: "",
 });
 const isAllProductsSelected = computed(() => { return form.value.product.length == products.value.length });
 const statuses = ref([
@@ -284,7 +295,6 @@ const search = (filters) => {
 
 const clearFilters = () => {
   isFiltered.value = false;
-  // isAllProductsSelected.value = false;
   form.value = {
     branch: [],
     status: [],
@@ -295,7 +305,8 @@ const clearFilters = () => {
     area: [],
     payment: [],
     category: [],
-    product: []
+    product: [],
+    delivery_type: "",
   };
 
   if(userRole == "admin"){
@@ -377,40 +388,30 @@ onMounted(() => {
     _getBranches(getBranches);
     _getDeliveries(getDeliveries);
     _getAgents(getAgents);
-    _getProducts(getProducts);
-    _getCategories(getCategories);
   }else if(userRole == "finance"){
     _getReports(getFinanceCustomReports);
     _getAreas(getFinanceAreas);
     _getBranches(getFinanceBranches);
     _getDeliveries(getFinanceDeliveries);
     _getAgents(getFinanceAgents);
-    _getProducts(getFinanceProducts);
-    _getCategories(getFinanceCategories);
   }else if(userRole == "operation"){
     _getReports(getOperationCustomReports);
     _getAreas(getOperationAreas);
     _getBranches(getOperationBranches);
     _getDeliveries(getOperationDeliveries);
     _getAgents(getOperationAgents);
-    _getProducts(getOperationProducts);
-    _getCategories(getOperationCategories);
   }else if(userRole == "logistic"){
     _getReports(getLogisticCustomReports);
     _getAreas(getLogisticAreas);
     _getBranches(getLogisticBranches);
     _getDeliveries(getLogisticDeliveries);
     _getAgents(getLogisticAgents);
-    _getProducts(getLogisticProducts);
-    _getCategories(getLogisticCategories);
   }else if(userRole == "agent"){
     _getReports(getAgentCustomReports);
     _getAreas(getAgentAreas);
     _getBranches(getAgentBranches);
     _getDeliveries(getAgentDeliveries);
     _getAgents(getAgentAgents);
-    _getProducts(getAgentProducts);
-    _getCategories(getAgentCategories);
   }
 });
 </script>
@@ -435,6 +436,10 @@ onMounted(() => {
             <VCol cols="12" class="pe-0 v-col-sm-12 v-col-md-10 v-col-lg-10">
               <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-0 pe-0" align="center"
                 justify="space-between">
+                <VCombobox prepend-inner-icon="tabler-building-store" v-model="form.delivery_type" :items="deliveryTypes"
+                  item-title="title" :return-object="false" item-value="id" placeholder="Select a Delivery Type"
+                  class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
+                  :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
                 <VCombobox prepend-inner-icon="tabler-building-store" multiple v-model="form.branch" :items="branches"
                   :item-title="langIdentifier" :return-object="false" item-value="id" :placeholder="$t('Select a Branch')"
                   class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
@@ -469,26 +474,6 @@ onMounted(() => {
                 <AppDateTimePicker v-model="form.to" :placeholder="$t('To')" class="mx-2 flex-grow-1"
                   :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
                 </AppDateTimePicker>
-              </VRow>
-              <VRow class="ps-lg-1 pe-lg-0 ps-md-1 pe-md-0 ps-sm-1 pe-sm-0 mx-0 w-100 mt-3 pe-0" align="center"
-                justify="space-between">
-                <VCombobox prepend-inner-icon="tabler-package" v-model="form.product" multiple :items="products" item-value="id"
-                  item-title="name_en" :return-object="false" :placeholder="$t('Select a Product')" class="mx-2 flex-grow-1 products"
-                  :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}" :style="$vuetify.display.xs ? 'width: 100%;' : ''">
-                  <template #prepend-item>
-                    <VBtn v-if="!isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
-                      {{ $t("Select All") }}
-                    </VBtn>
-                    <VBtn v-if="isAllProductsSelected" block elevation="0" text color="transparent" @click="selectAllProducts">
-                      {{ $t("Unselect All") }}
-                    </VBtn>
-                  </template>
-                </VCombobox>
-                <VCombobox prepend-inner-icon="tabler-bookmark" multiple v-model="form.category" :items="categories"
-                  item-value="id" item-title="name_en" :return-object="false" :placeholder="$t('Select a Category')"
-                  class="mx-2 flex-grow-1" :class="{ 'w-100 mt-3': $vuetify.display.xs, 'my-2': !$vuetify.display.xs}"
-                  :style="$vuetify.display.xs ? 'width: 100%;' : ''" />
-                  <AppTextField placeholder="Order Number" prepend-inner-icon="tabler-number" class="flex-grow-1" v-model="form.orderId"/>
               </VRow>
             </VCol>
             <VCol cols="12" class="mt-2 v-col-sm-12 v-col-md-2 v-col-lg-2">

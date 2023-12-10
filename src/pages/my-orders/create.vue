@@ -365,11 +365,12 @@ const _updateTime = () => {
     let endTime = new Date(currentDate);
     endTime.setHours(4, 55, 0, 0); // Set to 4:55 AM
     if(form.value.delivery_date == "" || form.value.delivery_date == null) return;
-    if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
-        menuType = "menuType=pre-order";
-        isPreValid.value = true;
-        _getProducts(menuType);
-    }
+      // delete the 2 requests onchange daypicker REQUIRED TASK
+    // if((new Date(form.value.delivery_date).getDate() !== new Date(currentDay.value).getDate()) || (currentDate >= startTime && currentDate <= endTime)){
+    //     menuType = "menuType=pre-order";
+    //     isPreValid.value = true;
+    //     _getProducts(menuType);
+    // }
   }
 
   timeKey.value += 1;

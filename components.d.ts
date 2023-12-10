@@ -74,6 +74,7 @@ declare module '@vue/runtime-core' {
     OrderProducts: typeof import('./src/components/OrderProducts.vue')['default']
     OrdersTable: typeof import('./src/components/OrdersTable.vue')['default']
     PaymentDetails: typeof import('./src/components/PaymentDetails.vue')['default']
+    ProductCategoryReport: typeof import('./src/components/ProductCategoryReport.vue')['default']
     ProductsTable: typeof import('./src/components/ProductsTable.vue')['default']
     RestaurantAddressDetails: typeof import('./src/components/restaurant/orders/RestaurantAddressDetails.vue')['default']
     RestaurantCategoriesTable: typeof import('./src/components/restaurant/categories/RestaurantCategoriesTable.vue')['default']
